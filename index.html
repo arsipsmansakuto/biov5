@@ -1,0 +1,3898 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KSL Bio Link v5.0 - Multi-Project Manager</title>
+  
+  <!-- CDN QRCodeJS untuk generate QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: rgba(37, 99, 235, 0.1);
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #dc2626;
+      --danger-soft: #fee2e2;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --warning: #d97706;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 999px;
+      --shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+      --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #publicPage {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 14px;
+      transition: background 0.3s ease;
+      position: relative;
+    }
+
+    #publicPage.bg-public-soft {
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%),
+                  radial-gradient(circle at bottom right, rgba(14,165,233,0.15), transparent 35%),
+                  #f1f5f9;
+    }
+
+    #publicPage.bg-public-dark {
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.3), transparent 40%),
+                  radial-gradient(circle at bottom right, rgba(139,92,246,0.25), transparent 40%),
+                  #0b0f19;
+    }
+
+    #publicPage.bg-public-clean {
+      background: #ffffff;
+    }
+
+    #publicPage.bg-public-mesh {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+
+    #publicPage.bg-public-custom {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 440px;
+      min-height: calc(100vh - 48px);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-frame.frame-bg-soft {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px);
+      border-color: rgba(255, 255, 255, 0.8);
+      color: #0f172a;
+    }
+
+    .phone-frame.frame-bg-dark {
+      background: rgba(15, 23, 42, 0.9) !important;
+      backdrop-filter: blur(20px);
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      color: #f8fafc !important;
+    }
+
+    .phone-frame.frame-bg-glass {
+      background: rgba(255, 255, 255, 0.58) !important;
+      backdrop-filter: blur(24px);
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+    }
+
+    .phone-frame.frame-bg-custom {
+      background-size: cover !important;
+      background-position: center !important;
+      position: relative;
+    }
+
+    .phone-frame.frame-bg-custom::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 0;
+    }
+
+    .phone-frame > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .quick-bg-pill-bar {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 4px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .quick-bg-dot {
+      width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    .quick-bg-dot:hover {
+      transform: scale(1.22);
+    }
+
+    .public-bio-switch-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      font-size: 11px;
+      font-weight: 850;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .hero {
+      padding: 44px 24px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .avatar-wrap {
+      width: 104px;
+      height: 104px;
+      margin: 0 auto 14px;
+      border-radius: 999px;
+      padding: 4px;
+      background: linear-gradient(135deg, var(--primary), #38bdf8);
+      box-shadow: 0 10px 24px rgba(37,99,235,0.25);
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      object-fit: cover;
+      background: #fff;
+      border: 3px solid #fff;
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .bio {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-muted);
+      max-width: 330px;
+      margin: 0 auto;
+    }
+
+    .phone-frame.frame-bg-dark .bio {
+      color: #94a3b8;
+    }
+
+    .socials {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .socials a {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+      transition: 0.2s;
+    }
+
+    .phone-frame.frame-bg-dark .socials a {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .socials a:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .public-links {
+      padding: 10px 18px 26px;
+      flex: 1;
+    }
+
+    .public-link-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      background: #fff;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      color: var(--text);
+      padding: 13px 14px;
+      border-radius: 16px;
+      margin-bottom: 11px;
+      box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+      transition: all 0.2s ease;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .public-link-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 28px rgba(37,99,235,0.12);
+    }
+
+    .public-link-card.featured-card {
+      border: 2px solid var(--primary);
+      background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(56,189,248,0.05)), #fff;
+      box-shadow: 0 12px 30px rgba(37,99,235,0.15);
+    }
+
+    .featured-badge-tag {
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      padding: 3px 8px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 8.5px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+
+    .public-order-badge {
+      font-size: 10px;
+      font-weight: 900;
+      color: var(--text-muted);
+      background: #f1f5f9;
+      padding: 3px 6px;
+      border-radius: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .public-link-icon {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-soft);
+      border-radius: 12px;
+      font-size: 18px;
+      overflow: hidden;
+    }
+
+    .public-link-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .public-link-title {
+      font-size: 14px;
+      font-weight: 850;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .public-link-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 3px;
+    }
+
+    .public-mini-tag {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .public-mini-lock {
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .public-link-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-left: 4px;
+    }
+
+    .public-footer {
+      text-align: center;
+      padding: 8px 16px 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .cta-widget-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+      width: 100%;
+      text-align: left;
+    }
+
+    .cta-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 10px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cta-divider::before, .cta-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .cta-countdown {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .countdown-unit {
+      background: var(--primary-soft);
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 10px;
+      padding: 6px 10px;
+      text-align: center;
+      min-width: 52px;
+    }
+
+    .countdown-num {
+      font-size: 18px;
+      font-weight: 950;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .countdown-lbl {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .quiz-opt-btn {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 750;
+      margin-top: 5px;
+      transition: all 0.15s;
+    }
+
+    .quiz-opt-btn:hover {
+      background: #eff6ff;
+      border-color: var(--primary);
+    }
+
+    .admin-fab {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #0f172a;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 850;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.22);
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: transform 0.15s;
+    }
+
+    .admin-fab:hover {
+      transform: translateY(-2px);
+    }
+
+    #loginPage {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    #loginPage.bg-login-soft {
+      background: radial-gradient(circle at top, rgba(37,99,235,0.16), transparent 40%), #f8fafc;
+    }
+
+    #loginPage.bg-login-dark {
+      background: radial-gradient(circle at top, rgba(59,130,246,0.25), transparent 40%), #0f172a;
+    }
+
+    #loginPage.bg-login-clean {
+      background: #ffffff;
+    }
+
+    #loginPage.bg-login-mesh {
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+    }
+
+    #loginPage.bg-login-custom {
+      background-size: cover;
+      background-position: center;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+      border: 1px solid var(--border);
+    }
+
+    .admin-layout {
+      width: 100%;
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(14px);
+    }
+
+    .admin-header h1 {
+      font-size: 19px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+    }
+
+    .admin-header p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-bio-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+
+    .header-bio-selector-label {
+      font-size: 10px;
+      font-weight: 900;
+      color: #1e40af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-bio-select {
+      background: #fff;
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #1e3a8a;
+      cursor: pointer;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 13px;
+      font-size: 11.5px;
+      font-weight: 850;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-light {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-light:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .role-badge-pill {
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .role-badge-pill.super {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .role-badge-pill.editor {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .admin-workspace-nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 5px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      backdrop-filter: blur(12px);
+    }
+
+    .admin-workspace-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .admin-workspace-tab.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.06), inset 0 0 0 1px var(--border);
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .link-workspace-grid {
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .link-editor-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      position: sticky;
+      top: 14px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    }
+
+    .link-card-head {
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .link-card-kicker {
+      font-size: 8.5px;
+      font-weight: 950;
+      color: var(--primary);
+      letter-spacing: 0.1em;
+    }
+
+    .link-card-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #0f172a;
+      margin-top: 1px;
+    }
+
+    .link-card-description {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .link-form-section {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      margin-bottom: 9px;
+      overflow: hidden;
+    }
+
+    .link-form-section-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 9px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .link-form-section-step {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 9.5px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .link-form-section-title {
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .link-form-section-body {
+      padding: 9px;
+    }
+
+    .form-group {
+      margin-bottom: 8px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      font-weight: 850;
+      color: #334155;
+      margin-bottom: 3px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 11.5px;
+      outline: none;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .icon-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      margin-bottom: 5px;
+    }
+
+    .icon-option-btn {
+      aspect-ratio: 1/1;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+      padding: 0;
+    }
+
+    .icon-option-btn:hover {
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    .icon-option-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .link-list-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+      min-width: 0;
+    }
+
+    .table-toolbar {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.4fr) minmax(100px, 0.8fr) minmax(130px, 1fr) 90px;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .link-reorder-banner {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      background: rgba(37, 99, 235, 0.06);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      border-radius: 8px;
+      color: var(--primary);
+      font-size: 10.5px;
+      font-weight: 800;
+      margin-bottom: 9px;
+    }
+
+    .link-bulk-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin-bottom: 9px;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .custom-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .custom-table th {
+      background: #f8fafc;
+      padding: 8px 9px;
+      text-align: left;
+      font-size: 8.5px;
+      font-weight: 950;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .custom-table td {
+      padding: 9px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    .custom-table tr:hover td {
+      background: #fafcff;
+    }
+
+    .table-row-item.is-dragging {
+      opacity: 0.45;
+      background: #f1f5f9;
+    }
+
+    .table-row-item.drag-over td {
+      border-top: 2px dashed var(--primary);
+    }
+
+    .urut-col-flex {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .drag-handle-btn {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 900;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .drag-handle-btn:active {
+      cursor: grabbing;
+    }
+
+    .order-pill-box {
+      min-width: 26px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 9.5px;
+      font-weight: 950;
+      color: #0f172a;
+    }
+
+    .badge-tayang {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .badge-tayang.live {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-tayang.inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .click-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 20px;
+      padding: 0 5px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 5px;
+      font-weight: 950;
+      font-size: 9.5px;
+    }
+
+    .action-btn-mini {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-size: 9px;
+      font-weight: 850;
+      cursor: pointer;
+      color: var(--text);
+      margin: 1px;
+    }
+
+    .action-btn-mini:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .action-btn-mini.danger {
+      background: #fff7f7;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .bio-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .bio-project-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .bio-project-card.is-active {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+      background: linear-gradient(145deg, #ffffff, #eff6ff);
+    }
+
+    .bio-project-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 200;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h3 {
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .modal-close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 0;
+      background: #f1f5f9;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toast-box {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 850;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      z-index: 300;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: opacity 0.2s;
+    }
+
+    @media (max-width: 900px) {
+      .link-workspace-grid {
+        grid-template-columns: 1fr;
+      }
+      .link-editor-card {
+        position: static;
+      }
+      .table-toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Halaman Publik Bio Link -->
+  <div id="publicPage" class="bg-public-soft">
+    <div class="phone-frame frame-bg-soft" id="publicPhoneFrame">
+      
+      <!-- Multi-Bio Switcher Cepat di Pojok Kiri Atas -->
+      <div class="public-bio-switch-badge" onclick="togglePublicBioDrawer()" title="Ganti Halaman Bio">
+        <span>📂</span>
+        <span id="pubCurrentBioName">Utama</span>
+        <span style="font-size:9px;">▾</span>
+      </div>
+
+      <!-- Quick Theme Switcher di Pojok Kanan Atas -->
+      <div class="quick-bg-pill-bar" title="Ubah Gaya Background Cepat">
+        <span style="font-size:11px; margin-right:2px;">🎨</span>
+        <div class="quick-bg-dot" style="background: radial-gradient(circle, #38bdf8, #2563eb);" onclick="quickChangePublicBg('SOFT')" title="Soft Blue"></div>
+        <div class="quick-bg-dot" style="background: #0f172a;" onclick="quickChangePublicBg('DARK')" title="Dark Premium"></div>
+        <div class="quick-bg-dot" style="background: #ffffff; border-color:#cbd5e1;" onclick="quickChangePublicBg('CLEAN')" title="Clean White"></div>
+        <div class="quick-bg-dot" style="background: linear-gradient(135deg, #a855f7, #06b6d4);" onclick="quickChangePublicBg('MESH')" title="Mesh Gradient"></div>
+        <label for="quickLocalBgInput" class="quick-bg-dot" style="background:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:9px; cursor:pointer;" title="Browse Gambar Komputer">
+          📁
+        </label>
+        <input type="file" id="quickLocalBgInput" accept="image/*" class="hidden" onchange="handlePublicBgFileSelect(event)">
+      </div>
+
+      <!-- Hero Profil -->
+      <div class="hero">
+        <div class="avatar-wrap">
+          <img class="avatar" id="pubAvatar" src="https://placehold.co/300x300?text=KSL" alt="Avatar">
+        </div>
+        <h1 class="name" id="pubName">Kucing Storia Labs</h1>
+        <p class="bio" id="pubBio">Web App, Google Sheets, Apps Script & Bio Link Solution</p>
+        <div class="socials" id="pubSocials"></div>
+      </div>
+
+      <!-- Links Container -->
+      <main class="public-links" id="pubLinksList"></main>
+
+      <div class="public-footer">
+        Dibuat dengan Google Sheets & KSL Bio Link <span style="opacity:0.75; font-size:10px;">v5.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Halaman Login Admin -->
+  <div id="loginPage" class="bg-login-soft hidden">
+    <div class="login-box">
+      <div style="text-align:center; margin-bottom:18px;">
+        <div class="avatar-wrap" style="width:72px; height:72px; margin-bottom:10px;">
+          <img class="avatar" src="https://placehold.co/300x300?text=KSL" alt="Admin">
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:5px; background:rgba(37,99,235,0.1); color:#1d4ed8; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:900; margin-bottom:6px;">
+          ⚡ KSL Bio Link v5.0
+        </div>
+        <h2 style="font-size:18px; font-weight:900;">Admin Login</h2>
+        <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Masuk ke dashboard pengelolaan Bio Link</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required value="admin@ksl.local" placeholder="admin@ksl.local">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required value="admin123" placeholder="admin123">
+        </div>
+        <button type="submit" class="btn" id="btnLoginSubmit" style="width:100%; padding:11px;">Masuk ke Admin</button>
+        <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:11px;">
+          <span style="color:var(--text-muted);">Default: admin@ksl.local / admin123</span>
+          <a href="#" onclick="showPublicPage(); return false;" style="color:var(--primary); text-decoration:none; font-weight:800;">← Kembali</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Admin -->
+  <div id="adminPage" class="admin-layout hidden">
+    
+    <!-- Header Admin -->
+    <header class="admin-header">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h1>Dashboard Admin</h1>
+          <span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:2px 7px; border-radius:999px; font-size:10px; font-weight:900;">v5.0 Pro</span>
+          <span id="headerUserRoleBadge" class="role-badge-pill super">⭐ Super Admin</span>
+        </div>
+        <p id="headerUserGreeting">Selamat datang! Kelola tautan, kampanye, dan analisis.</p>
+      </div>
+
+      <!-- Quick Selector Bio Link Aktif di Header -->
+      <div class="header-bio-selector-wrap">
+        <span class="header-bio-selector-label">BIO AKTIF:</span>
+        <select id="headerBioSelect" class="header-bio-select" onchange="switchActiveBioFromSelect(this.value)"></select>
+        <button type="button" class="btn super-only" id="headerBtnNewBio" style="padding:4px 8px; font-size:10px;" onclick="openCreateBioModal()">+ Baru</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-light" type="button" onclick="showPublicPage()">👁️ Lihat Halaman Publik</button>
+        <button class="btn btn-light" type="button" onclick="openResetPasswordModal()">🔑 Reset Password</button>
+        <button class="btn btn-secondary" type="button" onclick="handleAdminLogout()">🚪 Logout</button>
+      </div>
+    </header>
+
+    <!-- Navigasi Tab Admin -->
+    <nav class="admin-workspace-nav">
+      <button class="admin-workspace-tab active" onclick="switchAdminTab('links')">🔗 Links</button>
+      <button class="admin-workspace-tab super-only" id="navTabProjects" onclick="switchAdminTab('projects')">📂 Multi Bio</button>
+      <button class="admin-workspace-tab" onclick="switchAdminTab('overview')">📊 Overview</button>
+      <button class="admin-workspace-tab" onclick="switchAdminTab('trash')">🗑️ Recycle Bin</button>
+      <button class="admin-workspace-tab super-only" id="navTabAppearance" onclick="switchAdminTab('appearance')">🎨 Appearance</button>
+      <button class="admin-workspace-tab super-only" id="navTabUsers" onclick="switchAdminTab('users')">👥 Akun Admin</button>
+      <button class="admin-workspace-tab" onclick="switchAdminTab('share')">📲 Share & QR</button>
+    </nav>
+
+    <!-- TAB 1: LINKS (2 KOLOM KANAN-KIRI) -->
+    <div id="tab-links" class="admin-tab-content">
+      <div class="link-workspace-grid">
+        
+        <!-- KOLOM KIRI: STICKY FORM TAMBAH / EDIT LINK -->
+        <div class="link-editor-card">
+          <div class="link-card-head">
+            <div class="link-card-kicker">EDITOR LINK</div>
+            <h3 class="link-card-title" id="formHeaderTitle">Tambah / Edit Link</h3>
+            <p class="link-card-description">Isi detail link, campaign, dan proteksi sandi.</p>
+          </div>
+
+          <form id="linkForm" onsubmit="handleSaveLink(event)">
+            <input type="hidden" id="linkId">
+
+            <!-- Step 1: Link Details -->
+            <div class="link-form-section">
+              <div class="link-form-section-head">
+                <div class="link-form-section-step">1</div>
+                <div class="link-form-section-title">Link Details</div>
+              </div>
+              <div class="link-form-section-body">
+                <div class="form-group">
+                  <label for="linkTitle">Judul Link</label>
+                  <input type="text" id="linkTitle" required placeholder="Contoh: Playlist Kas RT">
+                </div>
+                <div class="form-group">
+                  <label for="linkUrl">URL</label>
+                  <input type="url" id="linkUrl" required placeholder="https://...">
+                </div>
+                <div class="form-group">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <label style="margin-bottom:0;">Icon Emoji / Gambar</label>
+                    <label for="linkCustomIconInput" style="font-size:9.5px; color:var(--primary); cursor:pointer; font-weight:800; text-decoration:underline;">
+                      📁 Browse dari Komputer
+                    </label>
+                    <input type="file" id="linkCustomIconInput" accept="image/*" class="hidden" onchange="handleLinkCustomIconSelect(event)">
+                  </div>
+                  <div class="icon-picker-grid" id="iconPickerGrid"></div>
+                  <!-- Preview jika icon dipilih dari komputer -->
+                  <div id="customIconPreviewWrap" class="hidden" style="display:flex; align-items:center; gap:8px; padding:5px 8px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; margin-top:4px;">
+                    <img id="customIconPreviewThumb" src="" alt="Custom Icon" style="width:24px; height:24px; object-fit:cover; border-radius:6px; border:1px solid #93c5fd;">
+                    <div style="flex:1; font-size:9.5px; color:#1e40af; font-weight:800;">Icon Gambar Aktif</div>
+                    <button type="button" class="btn btn-danger" style="padding:2px 6px; font-size:9px;" onclick="removeLinkCustomIcon()">Hapus</button>
+                  </div>
+                  <input type="text" id="linkIcon" readonly style="margin-top:4px; height:28px; font-size:11.5px;">
+                </div>
+                <div class="form-group">
+                  <label for="linkOrder">Urutan</label>
+                  <input type="number" id="linkOrder" placeholder="1" min="1">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="linkStatus">Status</label>
+                  <select id="linkStatus">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Smart Campaign & CTA Types -->
+            <div class="link-form-section">
+              <div class="link-form-section-head">
+                <div class="link-form-section-step">2</div>
+                <div class="link-form-section-title">Smart Campaign & Modul</div>
+              </div>
+              <div class="link-form-section-body">
+                <div class="form-group">
+                  <label for="linkCta">Tipe CTA</label>
+                  <select id="linkCta">
+                    <option value="LINK">🔗 Link Biasa</option>
+                    <option value="WATCH">▶️ Watch / Tonton</option>
+                    <option value="DOWNLOAD">⬇️ Download</option>
+                    <option value="BUY">🛒 Buy / Beli</option>
+                    <option value="CONTACT">💬 Contact</option>
+                    <option value="PORTFOLIO">💼 Portfolio</option>
+                    <option value="SOCIAL">❤️ Social Media</option>
+                    <option value="CALENDAR">📅 Calendar (Jadwal/Agenda)</option>
+                    <option value="DIVIDER">➖ Divider (Pemisah Bagian)</option>
+                    <option value="COUNTDOWN">⏳ Countdown (Hitung Mundur)</option>
+                    <option value="IMAGE">🖼️ Image (Banner Foto)</option>
+                    <option value="VISITOR_COUNTER">👁️ Visitor Counter</option>
+                    <option value="MAPS">📍 Maps (Peta Lokasi)</option>
+                    <option value="IMAGE_SLIDER">🎠 Image Slider (Karusel)</option>
+                    <option value="FORM">📝 Form (Kirim Pesan)</option>
+                    <option value="TEST">❓ Test (Kuis Mini)</option>
+                    <option value="PAGES">📄 Pages (Halaman Mini)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="linkCampaign">Nama Campaign</label>
+                  <input type="text" id="linkCampaign" placeholder="Contoh: Launch DesaKu VER 1">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="linkFeatured">Featured Link</label>
+                  <select id="linkFeatured">
+                    <option value="NO">Tidak</option>
+                    <option value="YES">⭐ Ya, prioritaskan link ini</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Proteksi Sandi & Jadwal -->
+            <div class="link-form-section">
+              <div class="link-form-section-head">
+                <div class="link-form-section-step">3</div>
+                <div class="link-form-section-title">Proteksi & Jadwal</div>
+              </div>
+              <div class="link-form-section-body">
+                <div class="form-group">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="linkIsLocked" style="width:auto;" onchange="togglePasswordField(this.checked)">
+                    <span>Kunci dengan Password 🔒</span>
+                  </label>
+                  <div id="passwordInputWrap" class="hidden" style="margin-top:6px;">
+                    <input type="text" id="linkPassword" placeholder="Masukkan kata sandi link...">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="linkStartAt">Mulai Tayang</label>
+                  <input type="datetime-local" id="linkStartAt">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="linkEndAt">Selesai Tayang</label>
+                  <input type="datetime-local" id="linkEndAt">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tombol Aksi Form -->
+            <div class="btn-row" style="margin-top:10px;">
+              <button type="submit" class="btn" style="flex:1;">Simpan Link</button>
+              <button type="button" class="btn btn-light" onclick="resetLinkForm()">Reset</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- KOLOM KANAN: DAFTAR LINK & TABEL INTERAKTIF -->
+        <div class="link-list-card">
+          <div class="link-card-head" style="margin-bottom:8px;">
+            <div class="link-card-kicker">LIBRARY DATA</div>
+            <h3 class="link-card-title">Daftar Link</h3>
+            <p class="link-card-description">Cari, filter, urutkan, dan kelola semua link yang terhubung.</p>
+          </div>
+
+          <!-- Toolbar Pencarian & Filter -->
+          <div class="table-toolbar">
+            <input type="search" id="searchLinksInput" placeholder="Cari judul atau URL..." oninput="filterAdminLinks()">
+            <select id="filterStatusSelect" onchange="filterAdminLinks()">
+              <option value="ALL">Semua Status</option>
+              <option value="ACTIVE">Aktif</option>
+              <option value="INACTIVE">Nonaktif</option>
+            </select>
+            <select id="filterSortSelect" onchange="filterAdminLinks()">
+              <option value="ORDER_ASC">Urutan: Kecil ke Besar</option>
+              <option value="ORDER_DESC">Urutan: Besar ke Kecil</option>
+              <option value="TITLE_ASC">Judul: A-Z</option>
+              <option value="CLICK_DESC">Klik: Terbanyak</option>
+            </select>
+            <select id="filterPageSize" onchange="filterAdminLinks()">
+              <option value="10">10 / hal</option>
+              <option value="25">25 / hal</option>
+              <option value="50">50 / hal</option>
+            </select>
+          </div>
+
+          <!-- Banner Panduan Reorder -->
+          <div class="link-reorder-banner">
+            <span style="font-size:13px;">⇅</span>
+            <span>Drag <strong>⋮⋮</strong> untuk mengubah urutan link. Perubahan tersimpan otomatis.</span>
+          </div>
+
+          <!-- Bulk Action Bar -->
+          <div id="bulkActionBar" class="link-bulk-bar hidden">
+            <div style="font-size:11px; font-weight:850; color:#1e40af;">
+              <span id="bulkSelectedCount">0</span> link dipilih
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn" style="padding:4px 8px; font-size:9.5px;" onclick="runBulkAction('ACTIVATE')">Aktifkan</button>
+              <button type="button" class="btn btn-light" style="padding:4px 8px; font-size:9.5px;" onclick="runBulkAction('DEACTIVATE')">Nonaktifkan</button>
+              <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:9.5px;" onclick="runBulkAction('RECYCLE')">Recycle Bin</button>
+              <button type="button" class="btn btn-light" style="padding:4px 8px; font-size:9.5px;" onclick="clearBulkSelection()">Batal</button>
+            </div>
+          </div>
+
+          <!-- Tabel Daftar Link -->
+          <div class="table-wrapper">
+            <table class="custom-table" id="adminLinksTable">
+              <thead>
+                <tr>
+                  <th style="width:115px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllRows(this.checked)">
+                      <span>URUT</span>
+                    </div>
+                  </th>
+                  <th>LINK</th>
+                  <th style="width:150px;">CAMPAIGN</th>
+                  <th style="width:100px;">TAYANG</th>
+                  <th style="width:60px; text-align:center;">KLIK</th>
+                  <th style="width:145px; text-align:center;">AKSI</th>
+                </tr>
+              </thead>
+              <tbody id="adminLinksTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB: MULTI BIO LINK -->
+    <div id="tab-projects" class="admin-tab-content hidden super-only">
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+          <div>
+            <h3 style="font-size:16px; font-weight:900;">Multiple Bio Link Projects</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Kelola beberapa halaman bio link dalam satu akun admin.</p>
+          </div>
+          <button type="button" class="btn" onclick="openCreateBioModal()">+ Buat Bio Link Baru</button>
+        </div>
+
+        <div class="bio-cards-grid" id="bioProjectsGrid"></div>
+      </div>
+    </div>
+
+    <!-- TAB: OVERVIEW -->
+    <div id="tab-overview" class="admin-tab-content hidden">
+      <div class="panel">
+        <h3 style="font-size:16px; font-weight:900; margin-bottom:14px;">Ringkasan Performa</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+          <div style="padding:16px; background:#f8fafc; border:1px solid var(--border); border-radius:14px;">
+            <div style="font-size:10.5px; font-weight:850; color:var(--text-muted);">TOTAL PAGE VIEWS</div>
+            <div style="font-size:28px; font-weight:950; margin-top:4px;" id="statTotalViews">0</div>
+          </div>
+          <div style="padding:16px; background:#f8fafc; border:1px solid var(--border); border-radius:14px;">
+            <div style="font-size:10.5px; font-weight:850; color:var(--text-muted);">TOTAL KLIK TAUTAN</div>
+            <div style="font-size:28px; font-weight:950; margin-top:4px; color:var(--primary);" id="statTotalClicks">0</div>
+          </div>
+          <div style="padding:16px; background:#f8fafc; border:1px solid var(--border); border-radius:14px;">
+            <div style="font-size:10.5px; font-weight:850; color:var(--text-muted);">LINK AKTIF</div>
+            <div style="font-size:28px; font-weight:950; margin-top:4px; color:var(--success);" id="statActiveLinks">0</div>
+          </div>
+          <div style="padding:16px; background:#f8fafc; border:1px solid var(--border); border-radius:14px;">
+            <div style="font-size:10.5px; font-weight:850; color:var(--text-muted);">RATA-RATA CTR</div>
+            <div style="font-size:28px; font-weight:950; margin-top:4px;" id="statCtr">0%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RECYCLE BIN -->
+    <div id="tab-trash" class="admin-tab-content hidden">
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div>
+            <h3 style="font-size:16px; font-weight:900;">Recycle Bin (Tempat Sampah)</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Tautan yang dipulihkan akan kembali aktif di bio link saat ini.</p>
+          </div>
+          <span style="background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:900;" id="trashCountBadge">0 Link</span>
+        </div>
+        <div id="trashListWrapper" style="display:grid; gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB: APPEARANCE -->
+    <div id="tab-appearance" class="admin-tab-content hidden super-only">
+      <div class="panel">
+        <h3 style="font-size:16px; font-weight:900; margin-bottom:14px;">Kustomisasi Tampilan & Latar Belakang</h3>
+        
+        <form id="appearanceForm" onsubmit="handleSaveAppearance(event)">
+          <!-- Profil Brand -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px;">
+            <div class="form-group">
+              <label for="settingName">Nama / Brand</label>
+              <input type="text" id="settingName" required>
+            </div>
+            <div class="form-group">
+              <label for="settingThemeColor">Warna Aksen Utama</label>
+              <input type="color" id="settingThemeColor" style="height:36px; padding:2px;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="settingBio">Bio / Deskripsi</label>
+            <textarea id="settingBio" rows="2"></textarea>
+          </div>
+
+          <!-- Kustomisasi Background Publik -->
+          <div style="padding:14px; background:#f8fafc; border:1px solid var(--border); border-radius:12px; margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:900; color:#0f172a; margin-bottom:8px;">Latar Belakang (Background) Halaman Publik</label>
+            
+            <div class="form-group">
+              <label for="settingPublicBgType">Gaya Background Publik</label>
+              <select id="settingPublicBgType" onchange="togglePublicCustomBgOptions(this.value)">
+                <option value="SOFT">Soft Blue Gradient (Default)</option>
+                <option value="DARK">Dark Slate & Nebula Premium</option>
+                <option value="CLEAN">Clean Minimalist White</option>
+                <option value="MESH">Vibrant Cyan & Purple Mesh</option>
+                <option value="CUSTOM">Custom Gambar (Browse Komputer / URL)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="settingFrameStyle">Gaya Latar Kartu Tampilan Awal (Phone Frame)</label>
+              <select id="settingFrameStyle">
+                <option value="SOFT">Kartu Transparan Lembut (Glass Light)</option>
+                <option value="DARK">Kartu Gelap Elegan (Glass Dark)</option>
+                <option value="GLASS">Ultra Frosted Glass</option>
+                <option value="CUSTOM">Ikuti Gambar Background Utama</option>
+              </select>
+            </div>
+
+            <!-- Upload Publik dari Komputer & URL -->
+            <div id="publicCustomBgWrapper" class="hidden" style="background:#fff; padding:10px; border-radius:10px; border:1px solid var(--border); margin-top:8px;">
+              <div class="form-group">
+                <label>Pilih Gambar Publik dari Komputer Lokal</label>
+                <input type="file" id="publicBgFileInput" accept="image/*" onchange="handlePublicBgFileSelect(event)">
+              </div>
+              <div id="publicBgFilePreviewWrap" class="hidden" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <img id="publicBgFileThumb" src="" alt="Thumbnail" style="width:44px; height:44px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">
+                <button type="button" class="btn btn-danger" style="padding:3px 7px; font-size:9.5px;" onclick="removePublicBgFile()">Hapus Gambar Lokal</button>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="settingPublicBgUrl">Atau Masukkan URL Gambar Web (HTTPS)</label>
+                <input type="url" id="settingPublicBgUrl" placeholder="https://images.unsplash.com/..." oninput="handlePublicBgUrlInput(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Kustomisasi Background Login -->
+          <div style="padding:14px; background:#f8fafc; border:1px solid var(--border); border-radius:12px; margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:900; color:#0f172a; margin-bottom:8px;">Latar Belakang (Background) Halaman Login Admin</label>
+            <div class="form-group">
+              <label for="settingLoginBgType">Pilihan Gaya Background Login</label>
+              <select id="settingLoginBgType" onchange="toggleLoginCustomBg(this.value)">
+                <option value="SOFT">Soft Blue Gradient (Default)</option>
+                <option value="DARK">Dark Slate & Nebula Premium</option>
+                <option value="CLEAN">Clean Minimalist White</option>
+                <option value="MESH">Vibrant Purple & Cyan Mesh</option>
+                <option value="CUSTOM">Custom Gambar (Browse Komputer / URL)</option>
+              </select>
+            </div>
+            <div id="loginCustomBgWrapper" class="hidden" style="background:#fff; padding:10px; border-radius:10px; border:1px solid var(--border); margin-top:8px;">
+              <div class="form-group">
+                <label>Pilih Gambar Login dari Komputer Lokal</label>
+                <input type="file" id="loginBgFileInput" accept="image/*" onchange="handleLoginBgFileSelect(event)">
+              </div>
+              <div id="loginBgFilePreviewWrap" class="hidden" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <img id="loginBgFileThumb" src="" alt="Thumbnail Login" style="width:44px; height:44px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">
+                <button type="button" class="btn btn-danger" style="padding:3px 7px; font-size:9.5px;" onclick="removeLoginBgFile()">Hapus Gambar Lokal</button>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="settingLoginBgUrl">Atau Masukkan URL Gambar Background Login (HTTPS)</label>
+                <input type="url" id="settingLoginBgUrl" placeholder="https://images.unsplash.com/..." oninput="handleLoginBgUrlInput(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn" style="padding:9px 16px;">Simpan Perubahan Tampilan</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: AKUN ADMIN -->
+    <div id="tab-users" class="admin-tab-content hidden super-only">
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+          <div>
+            <h3 style="font-size:16px; font-weight:900;">Manajemen Akun Login Admin</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Tambah, perbarui sandi, ubah wewenang, atau hapus pengguna.</p>
+          </div>
+          <button type="button" class="btn" style="padding:6px 11px; font-size:10.5px;" onclick="resetUserForm()">+ Tambah Akun Baru</button>
+        </div>
+
+        <div class="link-workspace-grid" style="grid-template-columns: 290px minmax(0, 1fr);">
+          <div class="link-editor-card" style="position:static;">
+            <div class="link-card-head">
+              <div class="link-card-kicker">PENGGUNA</div>
+              <h3 class="link-card-title" id="userFormTitle">Tambah Akun</h3>
+              <p class="link-card-description">Kelola kredensial dan hak akses administrator.</p>
+            </div>
+
+            <form id="userForm" onsubmit="handleSaveUser(event)">
+              <input type="hidden" id="userId">
+              <div class="form-group">
+                <label for="userName">Nama Lengkap</label>
+                <input type="text" id="userName" required placeholder="Contoh: Admin Kas">
+              </div>
+              <div class="form-group">
+                <label for="userEmail">Email Login</label>
+                <input type="email" id="userEmail" required placeholder="admin@domain.com">
+              </div>
+              <div class="form-group">
+                <label for="userPassword" id="userPasswordLabel">Password</label>
+                <input type="password" id="userPassword" placeholder="Minimal 6 karakter">
+                <small id="userPassHint" style="display:none; font-size:9.5px; color:var(--text-muted); margin-top:2px;">Kosongkan jika tidak ingin mengganti password.</small>
+              </div>
+              <div class="form-group">
+                <label for="userRole">Peran (Role)</label>
+                <select id="userRole">
+                  <option value="SUPER_ADMIN">Super Admin (Akses Penuh)</option>
+                  <option value="EDITOR">Editor (Konten Link Saja)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:12px;">
+                <label for="userStatus">Status Akun</label>
+                <select id="userStatus">
+                  <option value="ACTIVE">Aktif (Bisa Login)</option>
+                  <option value="INACTIVE">Nonaktif (Diblokir)</option>
+                </select>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn" style="flex:1;">Simpan Akun</button>
+                <button type="button" class="btn btn-light" onclick="resetUserForm()">Batal</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="link-list-card">
+            <div class="table-wrapper">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>NAMA / EMAIL</th>
+                    <th style="width:110px;">ROLE</th>
+                    <th style="width:80px;">STATUS</th>
+                    <th style="width:110px; text-align:center;">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SHARE & QR -->
+    <div id="tab-share" class="admin-tab-content hidden">
+      <div class="panel" style="text-align:center;">
+        <h3 style="font-size:16px; font-weight:900; margin-bottom:6px;">QR Code & Bagikan Tautan Publik</h3>
+        <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:14px;">Bagikan bio link aktif dengan kode QR yang dioptimalkan untuk Google Lens.</p>
+        
+        <!-- Wadah QR Code dengan Quiet Zone Optimal -->
+        <div style="display:inline-block; padding:16px; background:#ffffff; border:1px solid var(--border); border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.06); margin-bottom:14px;">
+          <div id="adminQrCodeBox" style="display:flex; justify-content:center; align-items:center;"></div>
+          <div style="font-size:10px; font-weight:850; color:#64748b; margin-top:8px;">Scan dengan Google Lens / Kamera HP</div>
+        </div>
+        
+        <!-- Kotak Tautan Publik -->
+        <div style="max-width:540px; margin:0 auto 14px; text-align:left; background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:10px 12px;">
+          <label style="font-size:10px; font-weight:900; color:#334155; margin-bottom:4px; display:block;">Alamat URL Publik Bio Link Aktif:</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="shareUrlDisplayInput" readonly style="font-size:11px; background:#fff; font-weight:750; color:#1e3a8a; cursor:text;" onclick="this.select()">
+            <button type="button" class="btn" style="padding:6px 12px; font-size:11px;" onclick="copyPublicShareUrl()">📋 Salin</button>
+            <button type="button" class="btn btn-light" style="padding:6px 10px; font-size:11px;" onclick="openPublicShareUrlInNewTab()" title="Buka di tab browser baru">🌐 Buka ↗</button>
+          </div>
+          
+          <!-- Konfigurasi URL Deployment jika belum terhubung otomatis -->
+          <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:8px;">
+            <details style="font-size:10.5px; color:#64748b; cursor:pointer;">
+              <summary style="font-weight:800; color:var(--primary);">⚙️ Ubah URL Deployment Web App (Jika URL di atas tidak bisa diakses)</summary>
+              <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                <p style="font-size:10px; line-height:1.4;">Jika Anda menggunakan deployment Google Apps Script baru, tempel URL Web App resmi (berakhir dengan <code>/exec</code>) di bawah ini:</p>
+                <div style="display:flex; gap:6px;">
+                  <input type="url" id="customDeployUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:10.5px;">
+                  <button type="button" class="btn" style="font-size:10px; padding:4px 8px;" onclick="saveCustomDeploymentUrl()">Terapkan</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="btn-row" style="justify-content:center;">
+          <button type="button" class="btn btn-light" onclick="copyPublicShareUrl()">📋 Salin Link Bio Publik</button>
+          <button type="button" class="btn btn-light" onclick="downloadQrCodePng()">💾 Unduh QR (PNG)</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL PROTEKSI SANDI LINK -->
+  <div id="linkPasswordModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3>🔒 Tautan Terkunci</h3>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Masukkan kata sandi untuk mengakses tautan ini.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeLinkPasswordModal()">✕</button>
+      </div>
+      <form id="verifyPasswordForm" onsubmit="handleVerifyLinkPassword(event)">
+        <input type="hidden" id="targetProtectedLinkId">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label for="enteredLinkPassword">Kata Sandi</label>
+          <input type="password" id="enteredLinkPassword" required placeholder="Masukkan sandi..." autocomplete="off">
+        </div>
+        <div class="btn-row" style="justify-content:flex-end;">
+          <button type="button" class="btn btn-light" onclick="closeLinkPasswordModal()">Batal</button>
+          <button type="submit" class="btn">Buka Tautan →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL RESET PASSWORD ADMIN -->
+  <div id="resetPasswordModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3>Reset Password Admin</h3>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Ubah password login akun administrator aktif.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeResetPasswordModal()">✕</button>
+      </div>
+      <form id="resetPassForm" onsubmit="handleResetAdminPassword(event)">
+        <div class="form-group">
+          <label for="oldAdminPass">Password Lama</label>
+          <input type="password" id="oldAdminPass" required>
+        </div>
+        <div class="form-group">
+          <label for="newAdminPass">Password Baru</label>
+          <input type="password" id="newAdminPass" required minlength="6">
+        </div>
+        <div class="btn-row" style="justify-content:flex-end; margin-top:14px;">
+          <button type="button" class="btn btn-light" onclick="closeResetPasswordModal()">Batal</button>
+          <button type="submit" class="btn">Simpan Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL BUAT / EDIT BIO LINK BARU -->
+  <div id="bioProjectModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3 id="bioProjectModalTitle">Buat Bio Link Baru</h3>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Kelola profil, slug, dan tema halaman bio terpisah.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeBioProjectModal()">✕</button>
+      </div>
+      <form id="bioProjectForm" onsubmit="handleSaveBioProject(event)">
+        <input type="hidden" id="editBioId">
+        <div class="form-group">
+          <label for="newBioName">Nama Proyek / Brand</label>
+          <input type="text" id="newBioName" required placeholder="Contoh: Kedai Kopi Kita">
+        </div>
+        <div class="form-group">
+          <label for="newBioSlug">Slug URL (Unik)</label>
+          <input type="text" id="newBioSlug" required placeholder="contoh: kopi-kita" pattern="[a-z0-9\-]+">
+        </div>
+        <div class="form-group">
+          <label for="newBioDesc">Deskripsi / Bio Singkat</label>
+          <textarea id="newBioDesc" rows="2" placeholder="Deskripsi ringkas..."></textarea>
+        </div>
+        <div class="btn-row" style="justify-content:flex-end; margin-top:14px;">
+          <button type="button" class="btn btn-light" onclick="closeBioProjectModal()">Batal</button>
+          <button type="submit" class="btn">Simpan Halaman Bio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DRAWER BIO PUBLIK -->
+  <div id="publicBioDrawerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3>📂 Pilih Halaman Bio Link</h3>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Jelajahi halaman bio yang tersedia:</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="togglePublicBioDrawer()">✕</button>
+      </div>
+      <div id="publicBioDrawerList" style="display:grid; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Floating Tombol Buka Admin -->
+  <button type="button" class="admin-fab" id="adminFabBtn" onclick="handleOpenAdminClick()">
+    <span>⚙️</span>
+    <span id="adminFabLabel">Buka Admin</span>
+  </button>
+
+  <!-- Toast Notifikasi -->
+  <div id="toast" class="toast-box hidden"></div>
+
+  <script>
+    const APP_VERSION = "5.0.0";
+    const STORAGE_KEY = "KSL_BIO_LINK_MULTI_APP_STATE_V5";
+    const ADMIN_TOKEN_KEY = "KSL_BIO_ADMIN_TOKEN_V5";
+    const CUSTOM_DEPLOY_URL_KEY = "KSL_CUSTOM_DEPLOY_URL_V5";
+
+    // Injeksi URL Web App dari server template Google Apps Script jika tersedia
+    let SERVER_WEB_APP_URL = "";
+    try {
+      /* <? if (typeof webAppUrl !== 'undefined' && webAppUrl) { ?> */
+      SERVER_WEB_APP_URL = "<?= webAppUrl ?>";
+      /* <? } ?> */
+    } catch (e) {}
+
+    // Deteksi lingkungan Google Apps Script secara andal
+    const IS_GAS_ENV = (typeof google !== 'undefined' && google.script && google.script.run);
+
+    const DEFAULT_DATA = {
+      activeBioId: "bio-default",
+      loginBgType: "SOFT",
+      loginBgUrl: "",
+      loginBgCustomData: "",
+      adminUsers: [
+        {
+          id: "USR-01",
+          name: "Super Administrator",
+          email: "admin@ksl.local",
+          password: "admin123",
+          role: "SUPER_ADMIN",
+          status: "ACTIVE",
+          createdAt: "2026-01-01"
+        }
+      ],
+      bioProjects: [
+        {
+          id: "bio-default",
+          slug: "utama",
+          name: "Kucing Storia Labs",
+          bio: "Web App, Google Sheets, Apps Script & Bio Link Solution",
+          avatar: "https://placehold.co/300x300?text=KSL",
+          themeColor: "#2563eb",
+          views: 142,
+          publicBgType: "SOFT",
+          publicBgUrl: "",
+          publicBgCustomData: "",
+          frameStyle: "SOFT",
+          links: [
+            {
+              id: "LNK-01",
+              title: "Download Dashboard Generate Ver 2",
+              url: "https://drive.google.com/",
+              icon: "🔗",
+              order: 1,
+              status: "ACTIVE",
+              cta: "DOWNLOAD",
+              campaign: "Source Code Dashboard",
+              featured: "NO",
+              isLocked: false,
+              password: "",
+              startAt: "",
+              endAt: "",
+              clicks: 1
+            },
+            {
+              id: "LNK-02",
+              title: "KSL Desaku Ver 1 ⭐",
+              url: "https://youtube.com/",
+              icon: "▶️",
+              order: 2,
+              status: "ACTIVE",
+              cta: "WATCH",
+              campaign: "Launch Desaku Ver 1",
+              featured: "YES",
+              isLocked: false,
+              password: "",
+              startAt: "",
+              endAt: "",
+              clicks: 3
+            },
+            {
+              id: "LNK-03",
+              title: "KSL KasirKu Ver7",
+              url: "https://youtube.com/",
+              icon: "💻",
+              order: 3,
+              status: "ACTIVE",
+              cta: "WATCH",
+              campaign: "Launch KasirKu Ver 7",
+              featured: "NO",
+              isLocked: true,
+              password: "123",
+              startAt: "2026-08-28T17:00",
+              endAt: "2026-09-04T23:59",
+              clicks: 0
+            },
+            {
+              id: "LNK-04",
+              title: "Playlist Kas RT - Copy",
+              url: "https://youtube.com/",
+              icon: "🎬",
+              order: 4,
+              status: "ACTIVE",
+              cta: "LINK",
+              campaign: "-",
+              featured: "NO",
+              isLocked: false,
+              password: "",
+              startAt: "",
+              endAt: "",
+              clicks: 1
+            },
+            {
+              id: "LNK-05",
+              title: "Playlist Kas RT",
+              url: "https://youtube.com/",
+              icon: "▶️",
+              order: 5,
+              status: "ACTIVE",
+              cta: "LINK",
+              campaign: "-",
+              featured: "NO",
+              isLocked: false,
+              password: "",
+              startAt: "",
+              endAt: "",
+              clicks: 13
+            },
+            {
+              id: "LNK-06",
+              title: "Instagram KSL",
+              url: "https://instagram.com/",
+              icon: "📷",
+              order: 6,
+              status: "ACTIVE",
+              cta: "SOCIAL",
+              campaign: "-",
+              featured: "NO",
+              isLocked: false,
+              password: "",
+              startAt: "",
+              endAt: "",
+              clicks: 10
+            }
+          ],
+          deletedLinks: []
+        }
+      ]
+    };
+
+    let appState = (function loadInitialState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return {
+            ...DEFAULT_DATA,
+            ...parsed,
+            adminUsers: Array.isArray(parsed.adminUsers) && parsed.adminUsers.length > 0 ? parsed.adminUsers : DEFAULT_DATA.adminUsers,
+            bioProjects: Array.isArray(parsed.bioProjects) && parsed.bioProjects.length > 0 ? parsed.bioProjects : DEFAULT_DATA.bioProjects
+          };
+        }
+      } catch (err) {
+        console.warn("Gagal memuat state lokal:", err);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    })();
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.warn("Gagal menyimpan state:", e);
+      }
+    }
+
+    function getActiveBio() {
+      if (!appState.bioProjects || !appState.bioProjects.length) {
+        appState.bioProjects = JSON.parse(JSON.stringify(DEFAULT_DATA.bioProjects));
+      }
+      let current = appState.bioProjects.find(p => p.id === appState.activeBioId);
+      if (!current) {
+        current = appState.bioProjects[0];
+        appState.activeBioId = current.id;
+      }
+      return current;
+    }
+
+    const EMOJI_LIST = [
+      "🔗", "▶️", "📷", "☕", "💬", "🌐", "🛒", "💻",
+      "📚", "📝", "📄", "📊", "💰", "🏛️", "🎮", "⭐",
+      "🔥", "✅", "📌", "🎁", "🚀", "📰", "💡", "🎨"
+    ];
+
+    let selectedBulkIds = new Set();
+    let draggedRowId = null;
+    let currentLoggedInUserEmail = "admin@ksl.local";
+    let currentLoggedInUserRole = "SUPER_ADMIN";
+
+    function getCurrentUser() {
+      return (appState.adminUsers || []).find(u => u.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase()) || {
+        name: "Super Administrator",
+        email: "admin@ksl.local",
+        role: "SUPER_ADMIN"
+      };
+    }
+
+    function applyRolePermissions() {
+      const user = getCurrentUser();
+      currentLoggedInUserRole = user.role || "SUPER_ADMIN";
+      const isSuper = currentLoggedInUserRole === "SUPER_ADMIN";
+
+      document.querySelectorAll(".super-only").forEach(el => {
+        if (isSuper) {
+          el.classList.remove("hidden");
+        } else {
+          el.classList.add("hidden");
+        }
+      });
+
+      const roleBadge = document.getElementById("headerUserRoleBadge");
+      const greeting = document.getElementById("headerUserGreeting");
+      if (roleBadge) {
+        if (isSuper) {
+          roleBadge.className = "role-badge-pill super";
+          roleBadge.textContent = "⭐ Super Admin";
+        } else {
+          roleBadge.className = "role-badge-pill editor";
+          roleBadge.textContent = "✏️ Editor";
+        }
+      }
+      if (greeting) {
+        greeting.textContent = `Masuk sebagai ${user.name} (${isSuper ? 'Akses Penuh' : 'Akses Konten'})`;
+      }
+    }
+
+    function initEmojiPicker() {
+      const grid = document.getElementById("iconPickerGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      EMOJI_LIST.forEach((emoji, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "icon-option-btn" + (idx === 0 ? " active" : "");
+        btn.textContent = emoji;
+        btn.onclick = () => selectEmoji(emoji);
+        grid.appendChild(btn);
+      });
+      const iconInput = document.getElementById("linkIcon");
+      if (iconInput && !iconInput.value) {
+        iconInput.value = EMOJI_LIST[0];
+      }
+    }
+
+    function selectEmoji(emoji) {
+      document.getElementById("linkIcon").value = emoji;
+      document.querySelectorAll(".icon-option-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.textContent === emoji);
+      });
+      const previewWrap = document.getElementById("customIconPreviewWrap");
+      if (previewWrap) previewWrap.classList.add("hidden");
+    }
+
+    function handleLinkCustomIconSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Berkas harus berupa gambar!");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById("linkIcon").value = base64;
+        document.querySelectorAll(".icon-option-btn").forEach(b => b.classList.remove("active"));
+        const customWrap = document.getElementById("customIconPreviewWrap");
+        const customThumb = document.getElementById("customIconPreviewThumb");
+        if (customWrap && customThumb) {
+          customThumb.src = base64;
+          customWrap.classList.remove("hidden");
+        }
+        showToast("Icon gambar kustom aktif!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLinkCustomIcon() {
+      const customWrap = document.getElementById("customIconPreviewWrap");
+      if (customWrap) customWrap.classList.add("hidden");
+      const iconInput = document.getElementById("linkCustomIconInput");
+      if (iconInput) iconInput.value = "";
+      selectEmoji(EMOJI_LIST[0]);
+    }
+
+    function renderIconHtml(icon) {
+      if (!icon) return "🔗";
+      if (icon.startsWith("data:image") || icon.startsWith("http")) {
+        return `<img src="${icon}" alt="Icon" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
+      }
+      return icon;
+    }
+
+    function renderPublicView() {
+      const bio = getActiveBio();
+      const nameEl = document.getElementById("pubName");
+      const bioEl = document.getElementById("pubBio");
+      const avatarEl = document.getElementById("pubAvatar");
+      const currentBioNameEl = document.getElementById("pubCurrentBioName");
+      const linksContainer = document.getElementById("pubLinksList");
+
+      if (nameEl) nameEl.textContent = bio.name || "Kucing Storia Labs";
+      if (bioEl) bioEl.textContent = bio.bio || "";
+      if (avatarEl) avatarEl.src = bio.avatar || "https://placehold.co/300x300?text=KSL";
+      if (currentBioNameEl) currentBioNameEl.textContent = bio.name || "Utama";
+
+      if (!linksContainer) return;
+      linksContainer.innerHTML = "";
+
+      const activeLinks = (bio.links || []).filter(l => l.status === "ACTIVE");
+
+      if (activeLinks.length === 0) {
+        linksContainer.innerHTML = `<div style="text-align:center; padding:30px 10px; color:var(--text-muted); font-size:12px;">Belum ada tautan aktif.</div>`;
+        return;
+      }
+
+      activeLinks.forEach(link => {
+        if (["CALENDAR", "DIVIDER", "COUNTDOWN", "IMAGE", "VISITOR_COUNTER", "MAPS", "IMAGE_SLIDER", "FORM", "TEST", "PAGES"].includes(link.cta)) {
+          const widgetEl = renderCtaWidget(link);
+          if (widgetEl) linksContainer.appendChild(widgetEl);
+        } else {
+          const card = document.createElement("a");
+          card.className = "public-link-card" + (link.featured === "YES" ? " featured-card" : "");
+          card.href = link.isLocked ? "javascript:void(0)" : link.url;
+          card.target = link.isLocked ? "_self" : "_blank";
+
+          card.onclick = (e) => {
+            if (link.isLocked) {
+              e.preventDefault();
+              openProtectedLinkModal(link.id);
+            } else {
+              recordClickAction(link);
+            }
+          };
+
+          card.innerHTML = `
+            ${link.featured === "YES" ? '<span class="featured-badge-tag">FEATURED</span>' : ''}
+            <div class="public-order-badge">#${link.order || '-'}</div>
+            <div class="public-link-icon">${renderIconHtml(link.icon)}</div>
+            <div class="public-link-info">
+              <div class="public-link-title">${escapeHtml(link.title)}</div>
+              <div class="public-link-meta">
+                <span class="public-mini-tag">${getCtaTitle(link.cta)}</span>
+                ${link.campaign && link.campaign !== '-' ? `<span class="public-mini-tag">${escapeHtml(link.campaign)}</span>` : ''}
+                ${link.isLocked ? '<span class="public-mini-lock">🔒 Terkunci</span>' : ''}
+              </div>
+            </div>
+            <div class="public-link-arrow">→</div>
+          `;
+          linksContainer.appendChild(card);
+        }
+      });
+    }
+
+    function recordClickAction(link) {
+      link.clicks = (Number(link.clicks) || 0) + 1;
+      saveState();
+      renderOverviewStats();
+      renderAdminTable();
+
+      if (IS_GAS_ENV) {
+        google.script.run.recordLinkClick({
+          ID_LINK: link.id,
+          ID_PROJECT: getActiveBio().id,
+          TITLE: link.title,
+          URL: link.url,
+          USER_AGENT: navigator.userAgent || ''
+        });
+      }
+    }
+
+    function renderCtaWidget(link) {
+      const box = document.createElement("div");
+      box.className = "cta-widget-box";
+
+      if (link.cta === "DIVIDER") {
+        box.style.background = "transparent";
+        box.style.border = "none";
+        box.style.padding = "4px 0";
+        box.innerHTML = `<div class="cta-divider">${escapeHtml(link.title)}</div>`;
+        return box;
+      }
+
+      if (link.cta === "COUNTDOWN") {
+        box.innerHTML = `
+          <div style="font-weight:900; font-size:12.5px; text-align:center;">${escapeHtml(link.title)}</div>
+          <div class="cta-countdown">
+            <div class="countdown-unit"><div class="countdown-num">04</div><div class="countdown-lbl">HARI</div></div>
+            <div class="countdown-unit"><div class="countdown-num">18</div><div class="countdown-lbl">JAM</div></div>
+            <div class="countdown-unit"><div class="countdown-num">32</div><div class="countdown-lbl">MENIT</div></div>
+            <div class="countdown-unit"><div class="countdown-num">45</div><div class="countdown-lbl">DETIK</div></div>
+          </div>
+        `;
+        return box;
+      }
+
+      if (link.cta === "IMAGE") {
+        box.innerHTML = `
+          <div style="font-weight:850; font-size:12px; margin-bottom:6px;">${escapeHtml(link.title)}</div>
+          <a href="${escapeHtml(link.url)}" target="_blank" style="display:block; border-radius:10px; overflow:hidden;">
+            <img src="${escapeHtml(link.url.startsWith('http') ? link.url : 'https://placehold.co/600x320?text=Banner+Image')}" alt="Banner" style="width:100%; display:block; border-radius:10px; object-fit:cover;">
+          </a>
+        `;
+        return box;
+      }
+
+      if (link.cta === "VISITOR_COUNTER") {
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:10px; font-weight:800; color:var(--text-muted);">${escapeHtml(link.title)}</div>
+              <div style="font-size:18px; font-weight:950; color:var(--primary); margin-top:2px;">${getActiveBio().views || 142} Kunjungan</div>
+            </div>
+            <span style="font-size:24px;">👁️</span>
+          </div>
+        `;
+        return box;
+      }
+
+      if (link.cta === "MAPS") {
+        box.innerHTML = `
+          <div style="font-weight:850; font-size:12px; margin-bottom:4px;">📍 ${escapeHtml(link.title)}</div>
+          <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Buka rute navigasi lokasi Google Maps.</p>
+          <a href="${escapeHtml(link.url)}" target="_blank" class="btn btn-light" style="width:100%; text-decoration:none;">Buka di Google Maps ↗</a>
+        `;
+        return box;
+      }
+
+      if (link.cta === "FORM") {
+        box.innerHTML = `
+          <div style="font-weight:900; font-size:12.5px; margin-bottom:6px;">📝 ${escapeHtml(link.title)}</div>
+          <input type="text" placeholder="Nama Anda" style="margin-bottom:6px; font-size:11px;">
+          <textarea rows="2" placeholder="Tulis pesan Anda..." style="margin-bottom:6px; font-size:11px;"></textarea>
+          <button type="button" class="btn" style="width:100%; padding:7px;" onclick="showToast('Pesan formulir terkirim!')">Kirim Pesan</button>
+        `;
+        return box;
+      }
+
+      if (link.cta === "TEST") {
+        box.innerHTML = `
+          <div style="font-weight:900; font-size:12px; margin-bottom:6px;">❓ ${escapeHtml(link.title)}</div>
+          <button type="button" class="quiz-opt-btn" onclick="showToast('Jawaban A dipilih!')">A. Pilihan Utama</button>
+          <button type="button" class="quiz-opt-btn" onclick="showToast('Jawaban B dipilih!')">B. Pilihan Alternatif</button>
+        `;
+        return box;
+      }
+
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:900; font-size:12.5px;">${escapeHtml(link.title)}</div>
+          <a href="${escapeHtml(link.url)}" target="_blank" class="btn" style="padding:4px 8px; font-size:10px;">Buka ↗</a>
+        </div>
+      `;
+      return box;
+    }
+
+    function openProtectedLinkModal(linkId) {
+      document.getElementById("targetProtectedLinkId").value = linkId;
+      document.getElementById("enteredLinkPassword").value = "";
+      document.getElementById("linkPasswordModal").classList.remove("hidden");
+      setTimeout(() => document.getElementById("enteredLinkPassword").focus(), 80);
+    }
+
+    function renderAllViews() {
+      applyAllThemeStyles();
+      renderPublicView();
+      renderAdminTable();
+      renderRecycleBin();
+      renderOverviewStats();
+      renderBioProjectsUI();
+      renderAdminUsersTable();
+      syncHeaderBioSelect();
+      loadAppearanceSettings();
+      generateQrCode();
+    }
+
+    // ========================================================
+    // LOGIKA PENENTUAN URL PUBLIK KANONIKAL & GOOGLE LENS
+    // ========================================================
+    function getShareableBioUrl() {
+      const bio = getActiveBio();
+      const slug = bio ? bio.slug : 'utama';
+
+      // 1. Cek apakah ada URL Deployment yang disimpan kustom oleh pengguna
+      const customUrl = localStorage.getItem(CUSTOM_DEPLOY_URL_KEY);
+      if (customUrl && customUrl.trim().startsWith("http")) {
+        const cleanCustom = customUrl.trim().split("?")[0];
+        return `${cleanCustom}?bio=${encodeURIComponent(slug)}`;
+      }
+
+      // 2. Jika disuntikkan dari template server Google Apps Script
+      if (SERVER_WEB_APP_URL && SERVER_WEB_APP_URL.startsWith("http")) {
+        const cleanServer = SERVER_WEB_APP_URL.split("?")[0];
+        return `${cleanServer}?bio=${encodeURIComponent(slug)}`;
+      }
+
+      // 3. Jika URL saat ini bukan iframe internal sandbox
+      let currentHref = window.location.href;
+      if (currentHref.indexOf("googleusercontent.com") === -1 && currentHref.indexOf("userCodeAppPanel") === -1 && currentHref.startsWith("http")) {
+        const base = currentHref.split("?")[0];
+        return `${base}?bio=${encodeURIComponent(slug)}`;
+      }
+
+      // 4. Fallback default
+      return `https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec?bio=${encodeURIComponent(slug)}`;
+    }
+
+    function generateQrCode() {
+      const box = document.getElementById("adminQrCodeBox");
+      const urlInput = document.getElementById("shareUrlDisplayInput");
+      const customInput = document.getElementById("customDeployUrlInput");
+      if (!box || typeof QRCode === "undefined") return;
+
+      const shareUrl = getShareableBioUrl();
+
+      if (urlInput) {
+        urlInput.value = shareUrl;
+      }
+      if (customInput && !customInput.value) {
+        customInput.value = localStorage.getItem(CUSTOM_DEPLOY_URL_KEY) || "";
+      }
+
+      box.innerHTML = "";
+      new QRCode(box, {
+        text: shareUrl,
+        width: 220,
+        height: 220,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function saveCustomDeploymentUrl() {
+      const val = document.getElementById("customDeployUrlInput").value.trim();
+      if (!val) {
+        localStorage.removeItem(CUSTOM_DEPLOY_URL_KEY);
+        showToast("Pengaturan URL kustom dihapus.");
+      } else {
+        localStorage.setItem(CUSTOM_DEPLOY_URL_KEY, val);
+        showToast("URL Deployment Web App berhasil disimpan!");
+      }
+      generateQrCode();
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      let isCopied = false;
+      try {
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = text;
+        tempTextArea.style.position = "fixed";
+        tempTextArea.style.left = "-9999px";
+        tempTextArea.style.top = "0";
+        document.body.appendChild(tempTextArea);
+        tempTextArea.focus();
+        tempTextArea.select();
+        isCopied = document.execCommand("copy");
+        document.body.removeChild(tempTextArea);
+      } catch (err) {
+        isCopied = false;
+      }
+
+      if (isCopied) {
+        showToast(successMsg || "Tautan berhasil disalin ke clipboard!");
+      } else {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => showToast(successMsg || "Tautan berhasil disalin!"))
+            .catch(() => {
+              const urlInput = document.getElementById("shareUrlDisplayInput");
+              if (urlInput) {
+                urlInput.select();
+                showToast("Tekan Ctrl+C untuk menyalin URL!");
+              }
+            });
+        } else {
+          const urlInput = document.getElementById("shareUrlDisplayInput");
+          if (urlInput) {
+            urlInput.select();
+            showToast("Tekan Ctrl+C untuk menyalin URL!");
+          }
+        }
+      }
+    }
+
+    function copyPublicShareUrl() {
+      const shareUrl = getShareableBioUrl();
+      const bio = getActiveBio();
+      copyTextToClipboard(shareUrl, `URL publik (${bio ? bio.slug : 'utama'}) disalin!`);
+    }
+
+    function openPublicShareUrlInNewTab() {
+      const shareUrl = getShareableBioUrl();
+      window.open(shareUrl, "_blank");
+    }
+
+    function downloadQrCodePng() {
+      const qrBox = document.getElementById("adminQrCodeBox");
+      if (!qrBox) return;
+      const img = qrBox.querySelector("img");
+      const canvas = qrBox.querySelector("canvas");
+      let dataUrl = "";
+
+      if (img && img.src) {
+        dataUrl = img.src;
+      } else if (canvas) {
+        dataUrl = canvas.toDataURL("image/png");
+      }
+
+      if (!dataUrl) {
+        showToast("QR Code belum siap untuk diunduh!");
+        return;
+      }
+
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `QR-${getActiveBio().slug}-BioLink.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("QR Code berhasil diunduh!");
+    }
+
+    function handleOpenAdminClick() {
+      const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+      if (!token) {
+        showLoginPage();
+        return;
+      }
+
+      if (IS_GAS_ENV) {
+        showToast("Memeriksa sesi administrator...");
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              currentLoggedInUserEmail = res.user.email;
+              openAdminDashboardView();
+            } else {
+              localStorage.removeItem(ADMIN_TOKEN_KEY);
+              showLoginPage();
+            }
+          })
+          .withFailureHandler(function() {
+            openAdminDashboardView();
+          })
+          .adminMe(token);
+      } else {
+        const matched = (appState.adminUsers || []).find(u => u.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase() && u.status === 'ACTIVE');
+        if (matched) {
+          openAdminDashboardView();
+        } else {
+          showLoginPage();
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Baca query parameter via URL browser atau google.script.url
+      const urlParams = new URLSearchParams(window.location.search);
+      const pageParam = (urlParams.get("page") || "").toLowerCase();
+      let slugParam = urlParams.get("bio");
+
+      if (IS_GAS_ENV && typeof google.script.url !== 'undefined') {
+        google.script.url.getLocation(function(location) {
+          if (location && location.parameter) {
+            if (location.parameter.bio) {
+              const matched = appState.bioProjects.find(p => p.slug.toLowerCase() === location.parameter.bio.toLowerCase());
+              if (matched) {
+                appState.activeBioId = matched.id;
+                renderAllViews();
+              }
+            }
+            if (location.parameter.page === 'admin') {
+              handleOpenAdminClick();
+            }
+          }
+        });
+      }
+
+      // Ambil Canonical URL dari backend jika belum tersedia
+      if (IS_GAS_ENV && (!SERVER_WEB_APP_URL || !SERVER_WEB_APP_URL.startsWith("http"))) {
+        google.script.run
+          .withSuccessHandler(function(url) {
+            if (url) {
+              SERVER_WEB_APP_URL = url;
+              generateQrCode();
+            }
+          })
+          .getWebAppPublicUrl();
+      }
+
+      if (slugParam) {
+        const matched = appState.bioProjects.find(p => p.slug.toLowerCase() === slugParam.toLowerCase());
+        if (matched) appState.activeBioId = matched.id;
+      }
+
+      initEmojiPicker();
+      renderAllViews();
+      getActiveBio().views = (getActiveBio().views || 0) + 1;
+      saveState();
+
+      if (IS_GAS_ENV) {
+        google.script.run.recordPageView({
+          ID_PROJECT: getActiveBio().id,
+          USER_AGENT: navigator.userAgent || ''
+        });
+      }
+
+      if (pageParam === "admin") {
+        handleOpenAdminClick();
+      }
+    });
+
+    function handleVerifyLinkPassword(e) {
+      e.preventDefault();
+      const bio = getActiveBio();
+      const linkId = document.getElementById("targetProtectedLinkId").value;
+      const enteredPass = document.getElementById("enteredLinkPassword").value;
+      const link = (bio.links || []).find(l => l.id === linkId);
+
+      if (!link) {
+        closeLinkPasswordModal();
+        return;
+      }
+
+      if (enteredPass === link.password) {
+        closeLinkPasswordModal();
+        showToast("Password benar! Mengalihkan...");
+        openLinkUrl(link);
+      } else {
+        showToast("Password salah! Silakan coba lagi.");
+        document.getElementById("enteredLinkPassword").select();
+      }
+    }
+
+    function closeLinkPasswordModal() {
+      document.getElementById("linkPasswordModal").classList.add("hidden");
+    }
+
+    function openLinkUrl(link) {
+      recordClickAction(link);
+      window.open(link.url, "_blank");
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById("adminLinksTbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const bio = getActiveBio();
+      bio.links = bio.links || [];
+
+      const search = (document.getElementById("searchLinksInput")?.value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("filterStatusSelect")?.value || "ALL";
+      const sortFilter = document.getElementById("filterSortSelect")?.value || "ORDER_ASC";
+
+      let filtered = bio.links.filter(l => {
+        const matchSearch = !search || l.title.toLowerCase().includes(search) || l.url.toLowerCase().includes(search);
+        const matchStatus = statusFilter === "ALL" || l.status === statusFilter;
+        return matchSearch && matchStatus;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortFilter === "ORDER_DESC") return (b.order || 0) - (a.order || 0);
+        if (sortFilter === "TITLE_ASC") return a.title.localeCompare(b.title);
+        if (sortFilter === "CLICK_DESC") return (b.clicks || 0) - (a.clicks || 0);
+        return (a.order || 0) - (b.order || 0);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">Belum ada tautan yang sesuai.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(link => {
+        const isChecked = selectedBulkIds.has(link.id);
+        const tr = document.createElement("tr");
+        tr.className = "table-row-item";
+        tr.dataset.id = link.id;
+        tr.draggable = true;
+
+        const badgeClass = link.status === "ACTIVE" ? "live" : "inactive";
+        const badgeText = link.status === "ACTIVE" ? "🟢 Tayang" : "🔴 Nonaktif";
+
+        tr.innerHTML = `
+          <td>
+            <div class="urut-col-flex">
+              <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleRowSelection('${link.id}', this.checked)">
+              <div class="drag-handle-btn" title="Drag untuk mengubah urutan">⋮⋮</div>
+              <div class="order-pill-box">${link.order || '-'}</div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight:850; font-size:11.5px; display:flex; align-items:center; gap:6px;">
+              <span style="width:20px; height:20px; flex:0 0 20px; display:inline-flex; align-items:center; justify-content:center; border-radius:5px; overflow:hidden;">${renderIconHtml(link.icon)}</span>
+              <span>${escapeHtml(link.title)}</span>
+              ${link.featured === 'YES' ? '<span style="color:#eab308;" title="Featured">⭐</span>' : ''}
+              ${link.isLocked ? '<span title="Proteksi Sandi">🔒</span>' : ''}
+            </div>
+            <div style="font-size:10px; color:#64748b; margin-top:2px; word-break:break-all;">${escapeHtml(link.url)}</div>
+            <div style="font-size:9px; color:var(--primary); font-weight:800; margin-top:2px;">↳ ${getCtaTitle(link.cta)}</div>
+          </td>
+          <td>
+            <span style="font-weight:800; font-size:10.5px;">${escapeHtml(link.campaign || '-')}</span>
+          </td>
+          <td>
+            <span class="badge-tayang ${badgeClass}">${badgeText}</span>
+          </td>
+          <td style="text-align:center;">
+            <span class="click-pill">${link.clicks || 0}</span>
+          </td>
+          <td style="text-align:center; white-space:nowrap;">
+            <button type="button" class="action-btn-mini" onclick="editLink('${link.id}')">Edit</button>
+            <button type="button" class="action-btn-mini" onclick="duplicateLink('${link.id}')">Duplikat</button>
+            <button type="button" class="action-btn-mini" onclick="toggleLinkActive('${link.id}')">On/Off</button>
+            <button type="button" class="action-btn-mini danger" onclick="recycleLink('${link.id}')">Hapus</button>
+          </td>
+        `;
+
+        bindDragEvents(tr);
+        tbody.appendChild(tr);
+      });
+
+      updateBulkBarUI();
+    }
+
+    function bindDragEvents(row) {
+      row.addEventListener("dragstart", (e) => {
+        draggedRowId = row.dataset.id;
+        row.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      row.addEventListener("dragend", () => {
+        draggedRowId = null;
+        row.classList.remove("is-dragging");
+        document.querySelectorAll(".table-row-item").forEach(r => r.classList.remove("drag-over"));
+      });
+
+      row.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (row.dataset.id !== draggedRowId) row.classList.add("drag-over");
+      });
+
+      row.addEventListener("dragleave", () => {
+        row.classList.remove("drag-over");
+      });
+
+      row.addEventListener("drop", (e) => {
+        e.preventDefault();
+        row.classList.remove("drag-over");
+        const targetId = row.dataset.id;
+        if (!draggedRowId || draggedRowId === targetId) return;
+
+        const bio = getActiveBio();
+        const fromIdx = bio.links.findIndex(l => l.id === draggedRowId);
+        const toIdx = bio.links.findIndex(l => l.id === targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        const moved = bio.links.splice(fromIdx, 1)[0];
+        bio.links.splice(toIdx, 0, moved);
+
+        bio.links.forEach((l, i) => { l.order = i + 1; });
+
+        saveState();
+        renderAdminTable();
+        renderPublicView();
+        showToast("Urutan link berhasil diperbarui!");
+
+        if (IS_GAS_ENV) {
+          const itemsPayload = bio.links.map(l => ({ ID_LINK: l.id, SORT_ORDER: l.order }));
+          google.script.run.saveLinkOrder(itemsPayload, localStorage.getItem(ADMIN_TOKEN_KEY));
+        }
+      });
+    }
+
+    function handleSaveLink(e) {
+      e.preventDefault();
+      const bio = getActiveBio();
+      bio.links = bio.links || [];
+
+      const id = document.getElementById("linkId").value;
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkUrl").value.trim();
+      const icon = document.getElementById("linkIcon").value || "🔗";
+      const order = Number(document.getElementById("linkOrder").value) || (bio.links.length + 1);
+      const status = document.getElementById("linkStatus").value;
+      const cta = document.getElementById("linkCta").value;
+      const campaign = document.getElementById("linkCampaign").value.trim() || "-";
+      const featured = document.getElementById("linkFeatured").value;
+      const isLocked = document.getElementById("linkIsLocked").checked;
+      const password = isLocked ? document.getElementById("linkPassword").value.trim() : "";
+      const startAt = document.getElementById("linkStartAt").value;
+      const endAt = document.getElementById("linkEndAt").value;
+
+      if (isLocked && !password) {
+        showToast("Harap masukkan password untuk link terkunci!");
+        document.getElementById("linkPassword").focus();
+        return;
+      }
+
+      const linkRecord = {
+        id: id || ("LNK-" + Date.now().toString(36).toUpperCase()),
+        title, url, icon, order, status, cta, campaign, featured, isLocked, password, startAt, endAt,
+        clicks: 0
+      };
+
+      if (id) {
+        const existing = bio.links.find(l => l.id === id);
+        if (existing) {
+          Object.assign(existing, { title, url, icon, order, status, cta, campaign, featured, isLocked, password, startAt, endAt });
+        }
+        showToast("Link berhasil diperbarui!");
+      } else {
+        bio.links.push(linkRecord);
+        showToast("Link baru berhasil ditambahkan!");
+      }
+
+      saveState();
+      resetLinkForm();
+      renderAdminTable();
+      renderPublicView();
+      renderOverviewStats();
+      renderBioProjectsUI();
+
+      if (IS_GAS_ENV) {
+        google.script.run
+          .withSuccessHandler(res => { if (res && res.message) showToast(res.message); })
+          .saveLink({
+            ID_LINK: id,
+            ID_PROJECT: bio.id,
+            TITLE: title,
+            URL: url,
+            ICON: icon,
+            SORT_ORDER: order,
+            STATUS: status,
+            CTA_TYPE: cta,
+            CAMPAIGN: campaign,
+            FEATURED: featured,
+            IS_LOCKED: isLocked,
+            PASSWORD: password,
+            START_AT: startAt,
+            END_AT: endAt
+          }, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function editLink(id) {
+      const bio = getActiveBio();
+      const link = (bio.links || []).find(l => l.id === id);
+      if (!link) return;
+
+      document.getElementById("linkId").value = link.id;
+      document.getElementById("linkTitle").value = link.title;
+      document.getElementById("linkUrl").value = link.url;
+      document.getElementById("linkIcon").value = link.icon;
+
+      const customWrap = document.getElementById("customIconPreviewWrap");
+      const customThumb = document.getElementById("customIconPreviewThumb");
+      if (link.icon && (link.icon.startsWith("data:image") || link.icon.startsWith("http"))) {
+        document.querySelectorAll(".icon-option-btn").forEach(b => b.classList.remove("active"));
+        if (customWrap && customThumb) {
+          customThumb.src = link.icon;
+          customWrap.classList.remove("hidden");
+        }
+      } else {
+        if (customWrap) customWrap.classList.add("hidden");
+        selectEmoji(link.icon || EMOJI_LIST[0]);
+      }
+
+      document.getElementById("linkOrder").value = link.order;
+      document.getElementById("linkStatus").value = link.status;
+      document.getElementById("linkCta").value = link.cta || "LINK";
+      document.getElementById("linkCampaign").value = link.campaign !== "-" ? link.campaign : "";
+      document.getElementById("linkFeatured").value = link.featured || "NO";
+      
+      const lockCb = document.getElementById("linkIsLocked");
+      lockCb.checked = Boolean(link.isLocked);
+      togglePasswordField(lockCb.checked);
+      document.getElementById("linkPassword").value = link.password || "";
+
+      document.getElementById("linkStartAt").value = link.startAt || "";
+      document.getElementById("linkEndAt").value = link.endAt || "";
+
+      document.getElementById("formHeaderTitle").textContent = "Edit Link: " + link.title;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function duplicateLink(id) {
+      const bio = getActiveBio();
+      const link = (bio.links || []).find(l => l.id === id);
+      if (!link) return;
+
+      const dup = {
+        ...link,
+        id: "LNK-" + Date.now().toString(36).toUpperCase(),
+        title: link.title + " (Copy)",
+        order: (bio.links || []).length + 1,
+        clicks: 0
+      };
+
+      bio.links.push(dup);
+      saveState();
+      renderAdminTable();
+      renderPublicView();
+      renderBioProjectsUI();
+      showToast("Link berhasil diduplikasi!");
+    }
+
+    function toggleLinkActive(id) {
+      const bio = getActiveBio();
+      const link = (bio.links || []).find(l => l.id === id);
+      if (!link) return;
+      link.status = link.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+      saveState();
+      renderAdminTable();
+      renderPublicView();
+      renderOverviewStats();
+      showToast("Status link diubah menjadi: " + link.status);
+    }
+
+    function recycleLink(id) {
+      const bio = getActiveBio();
+      bio.links = bio.links || [];
+      bio.deletedLinks = bio.deletedLinks || [];
+      const idx = bio.links.findIndex(l => l.id === id);
+      if (idx === -1) return;
+
+      const [removed] = bio.links.splice(idx, 1);
+      removed.deletedAt = new Date().toISOString();
+      bio.deletedLinks.push(removed);
+
+      saveState();
+      renderAdminTable();
+      renderPublicView();
+      renderRecycleBin();
+      renderOverviewStats();
+      renderBioProjectsUI();
+      showToast("Link dipindahkan ke Recycle Bin.");
+
+      if (IS_GAS_ENV) {
+        google.script.run.deleteLink(id, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function resetLinkForm() {
+      document.getElementById("linkForm").reset();
+      document.getElementById("linkId").value = "";
+      const bio = getActiveBio();
+      document.getElementById("linkOrder").value = (bio.links || []).length + 1;
+      document.getElementById("formHeaderTitle").textContent = "Tambah / Edit Link";
+      const customWrap = document.getElementById("customIconPreviewWrap");
+      if (customWrap) customWrap.classList.add("hidden");
+      const iconInput = document.getElementById("linkCustomIconInput");
+      if (iconInput) iconInput.value = "";
+      selectEmoji(EMOJI_LIST[0]);
+      togglePasswordField(false);
+    }
+
+    function togglePasswordField(show) {
+      const wrap = document.getElementById("passwordInputWrap");
+      if (wrap) {
+        wrap.classList.toggle("hidden", !show);
+        if (show) document.getElementById("linkPassword").focus();
+      }
+    }
+
+    function toggleRowSelection(id, checked) {
+      if (checked) selectedBulkIds.add(id);
+      else selectedBulkIds.delete(id);
+      updateBulkBarUI();
+    }
+
+    function toggleSelectAllRows(checked) {
+      const bio = getActiveBio();
+      if (checked) {
+        (bio.links || []).forEach(l => selectedBulkIds.add(l.id));
+      } else {
+        selectedBulkIds.clear();
+      }
+      renderAdminTable();
+    }
+
+    function clearBulkSelection() {
+      selectedBulkIds.clear();
+      const allCb = document.getElementById("selectAllCheckbox");
+      if (allCb) allCb.checked = false;
+      renderAdminTable();
+    }
+
+    function updateBulkBarUI() {
+      const bar = document.getElementById("bulkActionBar");
+      const countEl = document.getElementById("bulkSelectedCount");
+      if (!bar || !countEl) return;
+      const count = selectedBulkIds.size;
+      countEl.textContent = count;
+      bar.classList.toggle("hidden", count === 0);
+    }
+
+    function runBulkAction(action) {
+      if (selectedBulkIds.size === 0) return;
+      const bio = getActiveBio();
+      const idsList = Array.from(selectedBulkIds);
+      
+      if (action === "ACTIVATE") {
+        (bio.links || []).forEach(l => {
+          if (selectedBulkIds.has(l.id)) l.status = "ACTIVE";
+        });
+        showToast(`${selectedBulkIds.size} link diaktifkan.`);
+      } else if (action === "DEACTIVATE") {
+        (bio.links || []).forEach(l => {
+          if (selectedBulkIds.has(l.id)) l.status = "INACTIVE";
+        });
+        showToast(`${selectedBulkIds.size} link dinonaktifkan.`);
+      } else if (action === "RECYCLE") {
+        const toRemove = [];
+        bio.deletedLinks = bio.deletedLinks || [];
+        bio.links = (bio.links || []).filter(l => {
+          if (selectedBulkIds.has(l.id)) {
+            toRemove.push({ ...l, deletedAt: new Date().toISOString() });
+            return false;
+          }
+          return true;
+        });
+        bio.deletedLinks.push(...toRemove);
+        showToast(`${toRemove.length} link dipindahkan ke Recycle Bin.`);
+      }
+
+      if (IS_GAS_ENV) {
+        google.script.run.bulkUpdateLinks({
+          action: action,
+          ids: idsList
+        }, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+
+      selectedBulkIds.clear();
+      saveState();
+      renderAdminTable();
+      renderPublicView();
+      renderRecycleBin();
+      renderOverviewStats();
+      renderBioProjectsUI();
+    }
+
+    function filterAdminLinks() {
+      renderAdminTable();
+    }
+
+    function renderRecycleBin() {
+      const wrap = document.getElementById("trashListWrapper");
+      const countBadge = document.getElementById("trashCountBadge");
+      if (!wrap) return;
+
+      const bio = getActiveBio();
+      const list = bio.deletedLinks || [];
+      if (countBadge) countBadge.textContent = list.length + " Link";
+
+      if (list.length === 0) {
+        wrap.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:12px;">Recycle Bin kosong untuk halaman bio ini.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = list.map(item => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:#f8fafc; border:1px solid var(--border); border-radius:10px;">
+          <div>
+            <div style="font-weight:850; font-size:12px; display:flex; align-items:center; gap:6px;">
+              <span style="width:20px; height:20px; flex:0 0 20px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; overflow:hidden;">${renderIconHtml(item.icon)}</span>
+              <span>${escapeHtml(item.title)}</span>
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${escapeHtml(item.url)}</div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn" style="padding:4px 8px; font-size:9.5px;" onclick="restoreDeletedLink('${item.id}')">Pulihkan</button>
+            <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:9.5px;" onclick="permanentDeleteLink('${item.id}')">Hapus Selamanya</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function restoreDeletedLink(id) {
+      const bio = getActiveBio();
+      bio.links = bio.links || [];
+      bio.deletedLinks = bio.deletedLinks || [];
+      const idx = bio.deletedLinks.findIndex(l => l.id === id);
+      if (idx === -1) return;
+
+      const [restored] = bio.deletedLinks.splice(idx, 1);
+      delete restored.deletedAt;
+      restored.order = bio.links.length + 1;
+      bio.links.push(restored);
+
+      saveState();
+      renderAdminTable();
+      renderPublicView();
+      renderRecycleBin();
+      renderOverviewStats();
+      renderBioProjectsUI();
+      showToast("Link berhasil dipulihkan.");
+
+      if (IS_GAS_ENV) {
+        google.script.run.restoreLink(id, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function permanentDeleteLink(id) {
+      const bio = getActiveBio();
+      bio.deletedLinks = (bio.deletedLinks || []).filter(l => l.id !== id);
+      saveState();
+      renderRecycleBin();
+      showToast("Link dihapus permanen.");
+
+      if (IS_GAS_ENV) {
+        google.script.run.deleteLinkPermanently(id, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function renderOverviewStats() {
+      const bio = getActiveBio();
+      const totalViews = bio.views || 0;
+      const totalClicks = (bio.links || []).reduce((acc, l) => acc + (Number(l.clicks) || 0), 0);
+      const activeLinks = (bio.links || []).filter(l => l.status === "ACTIVE").length;
+      const ctr = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : "0";
+
+      document.getElementById("statTotalViews").textContent = totalViews;
+      document.getElementById("statTotalClicks").textContent = totalClicks;
+      document.getElementById("statActiveLinks").textContent = activeLinks;
+      document.getElementById("statCtr").textContent = ctr + "%";
+    }
+
+    function applyAppTheme(color) {
+      document.documentElement.style.setProperty("--primary", color || "#2563eb");
+    }
+
+    function applyPublicBackground(type, customVal) {
+      const el = document.getElementById("publicPage");
+      if (!el) return;
+      el.className = "";
+      el.style.backgroundImage = "";
+
+      if (type === "SOFT") el.className = "bg-public-soft";
+      else if (type === "DARK") el.className = "bg-public-dark";
+      else if (type === "CLEAN") el.className = "bg-public-clean";
+      else if (type === "MESH") el.className = "bg-public-mesh";
+      else if (type === "CUSTOM" && customVal) {
+        el.className = "bg-public-custom";
+        el.style.backgroundImage = `url('${customVal}')`;
+      } else {
+        el.className = "bg-public-soft";
+      }
+    }
+
+    function applyPhoneFrameStyle(style, customBgVal) {
+      const frame = document.getElementById("publicPhoneFrame");
+      if (!frame) return;
+      frame.className = "phone-frame";
+      frame.style.backgroundImage = "";
+
+      if (style === "DARK") frame.classList.add("frame-bg-dark");
+      else if (style === "GLASS") frame.classList.add("frame-bg-glass");
+      else if (style === "CUSTOM" && customBgVal) {
+        frame.classList.add("frame-bg-custom");
+        frame.style.backgroundImage = `url('${customBgVal}')`;
+      } else {
+        frame.classList.add("frame-bg-soft");
+      }
+    }
+
+    function applyLoginBackground(type, customVal) {
+      const el = document.getElementById("loginPage");
+      if (!el) return;
+      el.className = "";
+      el.style.backgroundImage = "";
+
+      if (type === "SOFT") el.className = "bg-login-soft";
+      else if (type === "DARK") el.className = "bg-login-dark";
+      else if (type === "CLEAN") el.className = "bg-login-clean";
+      else if (type === "MESH") el.className = "bg-login-mesh";
+      else if (type === "CUSTOM" && customVal) {
+        el.className = "bg-login-custom";
+        el.style.backgroundImage = `url('${customVal}')`;
+      } else {
+        el.className = "bg-login-soft";
+      }
+    }
+
+    function applyAllThemeStyles() {
+      const bio = getActiveBio();
+      applyAppTheme(bio.themeColor || "#2563eb");
+      applyPublicBackground(bio.publicBgType || "SOFT", bio.publicBgCustomData || bio.publicBgUrl || "");
+      applyPhoneFrameStyle(bio.frameStyle || "SOFT", bio.publicBgCustomData || bio.publicBgUrl || "");
+      applyLoginBackground(appState.loginBgType || "SOFT", appState.loginBgCustomData || appState.loginBgUrl || "");
+    }
+
+    function quickChangePublicBg(type) {
+      const bio = getActiveBio();
+      bio.publicBgType = type;
+      bio.frameStyle = type === "DARK" ? "DARK" : "SOFT";
+      saveState();
+      applyPublicBackground(type, bio.publicBgCustomData || bio.publicBgUrl);
+      applyPhoneFrameStyle(bio.frameStyle, bio.publicBgCustomData || bio.publicBgUrl);
+      loadAppearanceSettings();
+      showToast("Tema diubah ke: " + type);
+    }
+
+    function handlePublicBgFileSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Berkas harus berupa gambar!");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        const bio = getActiveBio();
+        bio.publicBgType = "CUSTOM";
+        bio.publicBgCustomData = base64;
+        
+        applyPublicBackground("CUSTOM", base64);
+        if (bio.frameStyle === "CUSTOM") applyPhoneFrameStyle("CUSTOM", base64);
+
+        saveState();
+        loadAppearanceSettings();
+        showToast("Gambar lokal berhasil dimuat sebagai latar!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePublicBgFile() {
+      const bio = getActiveBio();
+      bio.publicBgCustomData = "";
+      const input = document.getElementById("publicBgFileInput");
+      if (input) input.value = "";
+      applyPublicBackground(bio.publicBgType, bio.publicBgUrl || "");
+      saveState();
+      loadAppearanceSettings();
+      showToast("Gambar lokal dihapus.");
+    }
+
+    function handlePublicBgUrlInput(url) {
+      if (url.trim()) {
+        const bio = getActiveBio();
+        bio.publicBgCustomData = "";
+        applyPublicBackground("CUSTOM", url.trim());
+      }
+    }
+
+    function handleLoginBgFileSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Berkas harus berupa gambar!");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        appState.loginBgType = "CUSTOM";
+        appState.loginBgCustomData = base64;
+        
+        applyLoginBackground("CUSTOM", base64);
+        saveState();
+        loadAppearanceSettings();
+        showToast("Gambar background login berhasil dimuat!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLoginBgFile() {
+      appState.loginBgCustomData = "";
+      const input = document.getElementById("loginBgFileInput");
+      if (input) input.value = "";
+      applyLoginBackground(appState.loginBgType, appState.loginBgUrl || "");
+      saveState();
+      loadAppearanceSettings();
+      showToast("Gambar lokal background login dihapus.");
+    }
+
+    function handleLoginBgUrlInput(url) {
+      if (url.trim()) {
+        appState.loginBgCustomData = "";
+        applyLoginBackground("CUSTOM", url.trim());
+      }
+    }
+
+    function togglePublicCustomBgOptions(val) {
+      const wrap = document.getElementById("publicCustomBgWrapper");
+      if (wrap) wrap.classList.toggle("hidden", val !== "CUSTOM");
+    }
+
+    function toggleLoginCustomBg(val) {
+      const wrap = document.getElementById("loginCustomBgWrapper");
+      if (wrap) wrap.classList.toggle("hidden", val !== "CUSTOM");
+    }
+
+    function loadAppearanceSettings() {
+      const bio = getActiveBio();
+      document.getElementById("settingName").value = bio.name || "";
+      document.getElementById("settingBio").value = bio.bio || "";
+      document.getElementById("settingThemeColor").value = bio.themeColor || "#2563eb";
+
+      document.getElementById("settingPublicBgType").value = bio.publicBgType || "SOFT";
+      togglePublicCustomBgOptions(bio.publicBgType || "SOFT");
+      document.getElementById("settingFrameStyle").value = bio.frameStyle || "SOFT";
+      document.getElementById("settingPublicBgUrl").value = bio.publicBgUrl || "";
+
+      const previewWrap = document.getElementById("publicBgFilePreviewWrap");
+      const thumb = document.getElementById("publicBgFileThumb");
+      if (bio.publicBgCustomData) {
+        previewWrap?.classList.remove("hidden");
+        if (thumb) thumb.src = bio.publicBgCustomData;
+      } else {
+        previewWrap?.classList.add("hidden");
+      }
+
+      document.getElementById("settingLoginBgType").value = appState.loginBgType || "SOFT";
+      toggleLoginCustomBg(appState.loginBgType || "SOFT");
+      document.getElementById("settingLoginBgUrl").value = appState.loginBgUrl || "";
+
+      const loginPreviewWrap = document.getElementById("loginBgFilePreviewWrap");
+      const loginThumb = document.getElementById("loginBgFileThumb");
+      if (appState.loginBgCustomData) {
+        loginPreviewWrap?.classList.remove("hidden");
+        if (loginThumb) loginThumb.src = appState.loginBgCustomData;
+      } else {
+        loginPreviewWrap?.classList.add("hidden");
+      }
+    }
+
+    function handleSaveAppearance(e) {
+      e.preventDefault();
+      const bio = getActiveBio();
+      bio.name = document.getElementById("settingName").value.trim();
+      bio.bio = document.getElementById("settingBio").value.trim();
+      bio.themeColor = document.getElementById("settingThemeColor").value;
+
+      bio.publicBgType = document.getElementById("settingPublicBgType").value;
+      bio.frameStyle = document.getElementById("settingFrameStyle").value;
+      bio.publicBgUrl = document.getElementById("settingPublicBgUrl").value.trim();
+
+      appState.loginBgType = document.getElementById("settingLoginBgType").value;
+      appState.loginBgUrl = document.getElementById("settingLoginBgUrl").value.trim();
+
+      saveState();
+      applyAllThemeStyles();
+      renderPublicView();
+      renderBioProjectsUI();
+      syncHeaderBioSelect();
+      showToast("Pengaturan tampilan berhasil disimpan!");
+    }
+
+    function syncHeaderBioSelect() {
+      const select = document.getElementById("headerBioSelect");
+      if (!select) return;
+      select.innerHTML = "";
+      appState.bioProjects.forEach(proj => {
+        const opt = document.createElement("option");
+        opt.value = proj.id;
+        opt.textContent = proj.name + " (" + proj.slug + ")";
+        if (proj.id === appState.activeBioId) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function switchActiveBioFromSelect(bioId) {
+      if (!bioId) return;
+      appState.activeBioId = bioId;
+      selectedBulkIds.clear();
+      saveState();
+      renderAllViews();
+      showToast("Beralih ke: " + getActiveBio().name);
+    }
+
+    function renderBioProjectsUI() {
+      const grid = document.getElementById("bioProjectsGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      appState.bioProjects.forEach(proj => {
+        const isActive = proj.id === appState.activeBioId;
+        const totalClicks = (proj.links || []).reduce((a, b) => a + (Number(b.clicks) || 0), 0);
+        const card = document.createElement("div");
+        card.className = "bio-project-card" + (isActive ? " is-active" : "");
+        card.innerHTML = `
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div>
+                <h4 style="font-size:14px; font-weight:900;">${escapeHtml(proj.name)}</h4>
+                <span style="font-size:10px; background:#eff6ff; color:#1d4ed8; padding:2px 6px; border-radius:4px; font-weight:800;">/${escapeHtml(proj.slug)}</span>
+              </div>
+              ${isActive ? '<span style="font-size:9.5px; background:#dcfce7; color:#166534; padding:2px 8px; border-radius:999px; font-weight:900;">AKTIF</span>' : ''}
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); line-height:1.45; margin-bottom:12px;">${escapeHtml(proj.bio || '-')}</p>
+            <div style="display:flex; gap:12px; font-size:10.5px; color:#475569; margin-bottom:14px; background:#f8fafc; padding:8px 10px; border-radius:8px;">
+              <div><strong>${(proj.links || []).length}</strong> Link</div>
+              <div><strong>${totalClicks}</strong> Klik</div>
+              <div><strong>${proj.views || 0}</strong> Views</div>
+            </div>
+          </div>
+          <div class="btn-row" style="justify-content:flex-end;">
+            ${!isActive ? `<button type="button" class="btn" style="padding:4px 8px; font-size:10px;" onclick="setActiveBioProject('${proj.id}')">Pilih & Kelola</button>` : ''}
+            <button type="button" class="btn btn-light" style="padding:4px 8px; font-size:10px;" onclick="openEditBioModal('${proj.id}')">Edit Info</button>
+            <button type="button" class="btn btn-light" style="padding:4px 8px; font-size:10px;" onclick="duplicateBioProject('${proj.id}')">Duplikat</button>
+            ${appState.bioProjects.length > 1 ? `<button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:10px;" onclick="deleteBioProject('${proj.id}')">Hapus</button>` : ''}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setActiveBioProject(id) {
+      appState.activeBioId = id;
+      selectedBulkIds.clear();
+      saveState();
+      renderAllViews();
+      showToast("Sekarang mengelola: " + getActiveBio().name);
+    }
+
+    function openCreateBioModal() {
+      if (currentLoggedInUserRole !== "SUPER_ADMIN") {
+        showToast("Hanya Super Admin yang dapat membuat bio baru!");
+        return;
+      }
+      document.getElementById("bioProjectForm").reset();
+      document.getElementById("editBioId").value = "";
+      document.getElementById("bioProjectModalTitle").textContent = "Buat Bio Link Baru";
+      document.getElementById("bioProjectModal").classList.remove("hidden");
+    }
+
+    function openEditBioModal(id) {
+      const proj = appState.bioProjects.find(p => p.id === id);
+      if (!proj) return;
+      document.getElementById("editBioId").value = proj.id;
+      document.getElementById("newBioName").value = proj.name;
+      document.getElementById("newBioSlug").value = proj.slug;
+      document.getElementById("newBioDesc").value = proj.bio || "";
+      document.getElementById("bioProjectModalTitle").textContent = "Edit: " + proj.name;
+      document.getElementById("bioProjectModal").classList.remove("hidden");
+    }
+
+    function closeBioProjectModal() {
+      document.getElementById("bioProjectModal").classList.add("hidden");
+    }
+
+    function handleSaveBioProject(e) {
+      e.preventDefault();
+      const id = document.getElementById("editBioId").value;
+      const name = document.getElementById("newBioName").value.trim();
+      const slug = document.getElementById("newBioSlug").value.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
+      const bio = document.getElementById("newBioDesc").value.trim();
+
+      const slugExists = appState.bioProjects.find(p => p.slug === slug && p.id !== id);
+      if (slugExists) {
+        showToast("Slug URL sudah digunakan oleh halaman lain!");
+        return;
+      }
+
+      if (id) {
+        const existing = appState.bioProjects.find(p => p.id === id);
+        if (existing) {
+          existing.name = name;
+          existing.slug = slug;
+          existing.bio = bio;
+        }
+        showToast("Halaman bio berhasil diperbarui!");
+      } else {
+        const newProj = {
+          id: "bio-" + Date.now().toString(36),
+          slug,
+          name,
+          bio,
+          avatar: "https://placehold.co/300x300?text=" + encodeURIComponent(name.slice(0, 3)),
+          themeColor: "#2563eb",
+          views: 0,
+          publicBgType: "SOFT",
+          publicBgUrl: "",
+          publicBgCustomData: "",
+          frameStyle: "SOFT",
+          links: [],
+          deletedLinks: []
+        };
+        appState.bioProjects.push(newProj);
+        appState.activeBioId = newProj.id;
+        showToast("Halaman bio baru berhasil dibuat!");
+      }
+
+      saveState();
+      closeBioProjectModal();
+      renderAllViews();
+    }
+
+    function duplicateBioProject(id) {
+      const source = appState.bioProjects.find(p => p.id === id);
+      if (!source) return;
+      const dup = JSON.parse(JSON.stringify(source));
+      dup.id = "bio-" + Date.now().toString(36);
+      dup.name = source.name + " (Copy)";
+      dup.slug = source.slug + "-copy";
+      dup.views = 0;
+      (dup.links || []).forEach(l => { l.clicks = 0; });
+      appState.bioProjects.push(dup);
+      saveState();
+      renderAllViews();
+      showToast("Halaman bio berhasil diduplikasi!");
+    }
+
+    function deleteBioProject(id) {
+      if (appState.bioProjects.length <= 1) {
+        showToast("Minimal harus tersisa 1 bio link!");
+        return;
+      }
+      const target = appState.bioProjects.find(p => p.id === id);
+      appState.bioProjects = appState.bioProjects.filter(p => p.id !== id);
+      if (appState.activeBioId === id) {
+        appState.activeBioId = appState.bioProjects[0].id;
+      }
+      saveState();
+      renderAllViews();
+      showToast(`Halaman ${target ? target.name : ''} dihapus.`);
+    }
+
+    function togglePublicBioDrawer() {
+      const modal = document.getElementById("publicBioDrawerModal");
+      const listEl = document.getElementById("publicBioDrawerList");
+      if (!modal || !listEl) return;
+      const isHidden = modal.classList.contains("hidden");
+
+      if (isHidden) {
+        listEl.innerHTML = appState.bioProjects.map(proj => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; cursor:pointer;" onclick="switchActiveBioPublic('${proj.id}')">
+            <div>
+              <div style="font-weight:900; font-size:12.5px;">${escapeHtml(proj.name)}</div>
+              <div style="font-size:10px; color:var(--text-muted);">/${escapeHtml(proj.slug)}</div>
+            </div>
+            ${proj.id === appState.activeBioId ? '<span style="font-size:10px; color:var(--primary); font-weight:900;">✓ Aktif</span>' : '<span style="font-size:11px; color:var(--text-muted);">Buka →</span>'}
+          </div>
+        `).join('');
+        modal.classList.remove("hidden");
+      } else {
+        modal.classList.add("hidden");
+      }
+    }
+
+    function switchActiveBioPublic(id) {
+      appState.activeBioId = id;
+      saveState();
+      renderAllViews();
+      togglePublicBioDrawer();
+      showToast("Membuka: " + getActiveBio().name);
+    }
+
+    function renderAdminUsersTable() {
+      const tbody = document.getElementById("adminUsersTbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const users = appState.adminUsers || [];
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">Belum ada akun admin.</td></tr>`;
+        return;
+      }
+
+      users.forEach(user => {
+        const tr = document.createElement("tr");
+        const isCurrent = user.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase();
+        const roleLabel = user.role === "SUPER_ADMIN" ? "⭐ Super Admin" : "✏️ Editor";
+        const statusBadge = user.status === "ACTIVE" 
+          ? `<span class="badge-tayang live">Aktif</span>` 
+          : `<span class="badge-tayang inactive">Nonaktif</span>`;
+
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight:900; font-size:12px; color:#0f172a; display:flex; align-items:center; gap:6px;">
+              <span>${escapeHtml(user.name)}</span>
+              ${isCurrent ? '<span style="font-size:8.5px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:1px 5px; border-radius:4px; font-weight:900;">Anda</span>' : ''}
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${escapeHtml(user.email)}</div>
+          </td>
+          <td><span style="font-size:10.5px; font-weight:800; color:#334155;">${roleLabel}</span></td>
+          <td>${statusBadge}</td>
+          <td style="text-align:center; white-space:nowrap;">
+            <button type="button" class="action-btn-mini" onclick="editUser('${user.id}')">Edit</button>
+            <button type="button" class="action-btn-mini danger" onclick="deleteUser('${user.id}')" ${isCurrent ? 'disabled title="Tidak dapat menghapus akun Anda sendiri"' : ''}>Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function resetUserForm() {
+      document.getElementById("userForm").reset();
+      document.getElementById("userId").value = "";
+      document.getElementById("userFormTitle").textContent = "Tambah Akun";
+      document.getElementById("userPasswordLabel").textContent = "Password";
+      document.getElementById("userPassword").required = true;
+      document.getElementById("userPassHint").style.display = "none";
+    }
+
+    function editUser(id) {
+      const user = (appState.adminUsers || []).find(u => u.id === id);
+      if (!user) return;
+      document.getElementById("userId").value = user.id;
+      document.getElementById("userName").value = user.name;
+      document.getElementById("userEmail").value = user.email;
+      document.getElementById("userRole").value = user.role || "SUPER_ADMIN";
+      document.getElementById("userStatus").value = user.status || "ACTIVE";
+      document.getElementById("userPassword").value = "";
+      document.getElementById("userPassword").required = false;
+      document.getElementById("userPasswordLabel").textContent = "Password Baru (Opsional)";
+      document.getElementById("userPassHint").style.display = "block";
+      document.getElementById("userFormTitle").textContent = "Edit: " + user.name;
+    }
+
+    function handleSaveUser(e) {
+      e.preventDefault();
+      const id = document.getElementById("userId").value;
+      const name = document.getElementById("userName").value.trim();
+      const email = document.getElementById("userEmail").value.trim().toLowerCase();
+      const password = document.getElementById("userPassword").value;
+      const role = document.getElementById("userRole").value;
+      const status = document.getElementById("userStatus").value;
+
+      appState.adminUsers = appState.adminUsers || [];
+      const existingEmail = appState.adminUsers.find(u => u.email.toLowerCase() === email && u.id !== id);
+      if (existingEmail) {
+        showToast("Email tersebut sudah digunakan!");
+        return;
+      }
+
+      if (id) {
+        const user = appState.adminUsers.find(u => u.id === id);
+        if (!user) return;
+        if (user.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase() && status === "INACTIVE") {
+          showToast("Tidak dapat menonaktifkan akun sendiri!");
+          return;
+        }
+        user.name = name;
+        user.email = email;
+        user.role = role;
+        user.status = status;
+        if (password) {
+          if (password.length < 6) {
+            showToast("Password minimal 6 karakter!");
+            return;
+          }
+          user.password = password;
+        }
+        showToast("Akun admin berhasil diperbarui!");
+      } else {
+        if (!password || password.length < 6) {
+          showToast("Password minimal 6 karakter!");
+          return;
+        }
+        const newUser = {
+          id: "USR-" + Date.now().toString(36).toUpperCase(),
+          name,
+          email,
+          password,
+          role,
+          status,
+          createdAt: new Date().toISOString().split("T")[0]
+        };
+        appState.adminUsers.push(newUser);
+        showToast("Akun admin baru ditambahkan!");
+      }
+
+      saveState();
+      resetUserForm();
+      renderAdminUsersTable();
+
+      if (IS_GAS_ENV) {
+        google.script.run
+          .withSuccessHandler(res => { if (res && res.message) showToast(res.message); })
+          .saveAdminUser({
+            ID_USER: id,
+            NAME: name,
+            EMAIL: email,
+            PASSWORD: password,
+            ROLE: role,
+            STATUS: status
+          }, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function deleteUser(id) {
+      appState.adminUsers = appState.adminUsers || [];
+      const user = appState.adminUsers.find(u => u.id === id);
+      if (!user) return;
+
+      if (user.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase()) {
+        showToast("Tidak dapat menghapus akun Anda sendiri!");
+        return;
+      }
+      if (appState.adminUsers.length <= 1) {
+        showToast("Minimal harus ada 1 akun admin!");
+        return;
+      }
+
+      appState.adminUsers = appState.adminUsers.filter(u => u.id !== id);
+      saveState();
+      renderAdminUsersTable();
+      showToast(`Akun ${user.name} berhasil dihapus.`);
+
+      if (IS_GAS_ENV) {
+        google.script.run
+          .withSuccessHandler(res => { if (res && res.message) showToast(res.message); })
+          .deleteAdminUser(id, localStorage.getItem(ADMIN_TOKEN_KEY));
+      }
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPassword").value;
+      const submitBtn = document.getElementById("btnLoginSubmit");
+
+      if (IS_GAS_ENV) {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Memeriksa...";
+        }
+
+        google.script.run
+          .withSuccessHandler(res => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Masuk ke Admin";
+            }
+            if (res && res.success) {
+              localStorage.setItem(ADMIN_TOKEN_KEY, res.token);
+              currentLoggedInUserEmail = res.user.email;
+              currentLoggedInUserRole = res.user.role || "SUPER_ADMIN";
+              showToast(`Selamat datang, ${res.user.name}!`);
+              openAdminDashboardView();
+            } else {
+              showToast(res && res.message ? res.message : "Email atau password admin salah!");
+            }
+          })
+          .withFailureHandler(err => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Masuk ke Admin";
+            }
+            fallbackLocalLogin(email, pass);
+          })
+          .adminLogin({ email: email, password: pass });
+        return;
+      }
+
+      fallbackLocalLogin(email, pass);
+    }
+
+    function fallbackLocalLogin(email, pass) {
+      appState.adminUsers = appState.adminUsers || [];
+      const matched = appState.adminUsers.find(u => u.email.toLowerCase() === email && u.password === pass);
+
+      if (matched) {
+        if (matched.status === "INACTIVE") {
+          showToast("Akun ini dinonaktifkan!");
+          return;
+        }
+        localStorage.setItem(ADMIN_TOKEN_KEY, "TOKEN-" + matched.id);
+        currentLoggedInUserEmail = matched.email;
+        currentLoggedInUserRole = matched.role || "SUPER_ADMIN";
+        showToast(`Selamat datang, ${matched.name}!`);
+        openAdminDashboardView();
+      } else {
+        showToast("Email atau password admin salah!");
+      }
+    }
+
+    function openAdminDashboardView() {
+      // 1. Sembunyikan halaman publik, login, dan tombol floating
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("publicPage").classList.add("hidden");
+      document.getElementById("adminFabBtn").classList.add("hidden");
+
+      // 2. Tutup semua modal overlay yang mungkin terbuka
+      document.querySelectorAll(".modal-overlay").forEach(modal => modal.classList.add("hidden"));
+
+      // 3. Buka Dashboard Admin
+      document.getElementById("adminPage").classList.remove("hidden");
+
+      // 4. Sesuaikan wewenang peran pengguna
+      applyRolePermissions();
+
+      // 5. Reset form dan arahkan ke tab Links
+      resetLinkForm();
+      resetUserForm();
+      switchAdminTab('links');
+      renderAllViews();
+    }
+
+    function handleAdminLogout() {
+      const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+
+      if (IS_GAS_ENV && token) {
+        google.script.run
+          .withSuccessHandler(() => {
+            showToast("Berhasil logout.");
+            showLoginPage();
+          })
+          .withFailureHandler(() => {
+            showToast("Berhasil logout.");
+            showLoginPage();
+          })
+          .adminLogout(token);
+      } else {
+        showToast("Berhasil logout.");
+        showLoginPage();
+      }
+    }
+
+    function showLoginPage() {
+      document.getElementById("publicPage").classList.add("hidden");
+      document.getElementById("adminPage").classList.add("hidden");
+      document.querySelectorAll(".modal-overlay").forEach(m => m.classList.add("hidden"));
+      document.getElementById("loginPage").classList.remove("hidden");
+      document.getElementById("adminFabBtn").classList.add("hidden");
+    }
+
+    function showPublicPage() {
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("adminPage").classList.add("hidden");
+      document.querySelectorAll(".modal-overlay").forEach(m => m.classList.add("hidden"));
+      document.getElementById("publicPage").classList.remove("hidden");
+      document.getElementById("adminFabBtn").classList.remove("hidden");
+      document.getElementById("adminFabLabel").textContent = "Buka Admin";
+      renderPublicView();
+    }
+
+    function switchAdminTab(tabName) {
+      if (currentLoggedInUserRole === "EDITOR" && ["projects", "appearance", "users"].includes(tabName)) {
+        showToast("Akses Ditolak: Menu ini hanya dapat diakses oleh Super Admin!");
+        return;
+      }
+
+      document.querySelectorAll(".admin-workspace-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".admin-tab-content").forEach(c => c.classList.add("hidden"));
+
+      const targetTab = document.querySelector(`.admin-workspace-tab[onclick*="${tabName}"]`);
+      const targetContent = document.getElementById("tab-" + tabName);
+
+      if (targetTab) targetTab.classList.add("active");
+      if (targetContent) targetContent.classList.remove("hidden");
+
+      if (tabName === "share") {
+        generateQrCode();
+      }
+    }
+
+    function openResetPasswordModal() {
+      document.getElementById("resetPassForm").reset();
+      document.getElementById("resetPasswordModal").classList.remove("hidden");
+    }
+
+    function closeResetPasswordModal() {
+      document.getElementById("resetPasswordModal").classList.add("hidden");
+    }
+
+    function handleResetAdminPassword(e) {
+      e.preventDefault();
+      const oldPass = document.getElementById("oldAdminPass").value;
+      const newPass = document.getElementById("newAdminPass").value;
+
+      appState.adminUsers = appState.adminUsers || [];
+      const user = appState.adminUsers.find(u => u.email.toLowerCase() === currentLoggedInUserEmail.toLowerCase());
+
+      if (user) {
+        if (user.password !== oldPass) {
+          showToast("Password lama salah!");
+          return;
+        }
+        user.password = newPass;
+        saveState();
+        closeResetPasswordModal();
+        renderAdminUsersTable();
+        showToast("Password admin berhasil diubah!");
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      if (!el) return;
+      if (toastTimer) clearTimeout(toastTimer);
+      el.textContent = msg;
+      el.classList.remove("hidden");
+      toastTimer = setTimeout(() => el.classList.add("hidden"), 2800);
+    }
+
+    function getCtaTitle(ctaKey) {
+      const map = {
+        LINK: "Link Biasa",
+        WATCH: "Tonton",
+        DOWNLOAD: "Download",
+        BUY: "Beli",
+        CONTACT: "Hubungi",
+        PORTFOLIO: "Portfolio",
+        SOCIAL: "Social Media",
+        CALENDAR: "Calendar",
+        DIVIDER: "Divider",
+        COUNTDOWN: "Countdown",
+        IMAGE: "Image",
+        VISITOR_COUNTER: "Visitor Counter",
+        MAPS: "Maps",
+        IMAGE_SLIDER: "Image Slider",
+        FORM: "Form",
+        TEST: "Test / Quiz",
+        PAGES: "Pages"
+      };
+      return map[ctaKey] || "Buka Link";
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
