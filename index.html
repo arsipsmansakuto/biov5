@@ -1216,15 +1216,15 @@
       <form id="loginForm" onsubmit="handleAdminLogin(event)">
         <div class="form-group">
           <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" required value="admin@ksl.local" placeholder="admin@ksl.local">
+          <input type="email" id="loginEmail" required value="" placeholder="">
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" required value="admin123" placeholder="admin123">
+          <input type="password" id="loginPassword" required value="" placeholder="">
         </div>
         <button type="submit" class="btn" id="btnLoginSubmit" style="width:100%; padding:11px;">Masuk ke Admin</button>
         <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:11px;">
-          <span style="color:var(--text-muted);">Default: admin@ksl.local / admin123</span>
+          <span style="color:var(--text-muted);"></span>
           <a href="#" onclick="showPublicPage(); return false;" style="color:var(--primary); text-decoration:none; font-weight:800;">← Kembali</a>
         </div>
       </form>
